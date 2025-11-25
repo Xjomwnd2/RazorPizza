@@ -1,0 +1,303 @@
+@page "/cart"
+@using RazorPizza.Models
+@using RazorPizza.Services
+@inject ICartService CartService
+@inject IToppingService ToppingService
+@inject IPromoCodeService PromoCodeService
+@inject NavigationManager Navigation
+
+<PageTitle>Shopping Cart - Razor Pizza</PageTitle>
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="display-5 fw-bold mb-4">
+                <i class="bi bi-cart"></i> Shopping Cart
+            </h1>
+        </div>
+    </div>
+
+    @if (!cartItems.Any())
+    {
+        <!-- Empty Cart -->
+        <div class="row">
+            <div class="col-md-6 mx-auto text-center py-5">
+                <i class="bi bi-cart-x display-1 text-muted"></i>
+                <h3 class="mt-4">Your cart is empty</h3>
+                <p class="text-muted">Add some delicious pizzas to get started!</p>
+                <button class="btn btn-primary btn-lg mt-3" @onclick="GoToMenu">
+                    <i class="bi bi-pizza"></i> Browse Menu
+                </button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <!-- Cart Items -->
+            <div class="col-lg-8">
+                @foreach (var item in cartItems)
+                {
+                    <div class="card mb-3 shadow-sm">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-2 text-center">
+                                    <i class="bi bi-pizza display-4 text-primary"></i>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5 class="card-title mb-1">@item.PizzaName</h5>
+                                    <div class="text-muted small">
+                                        <div><strong>Size:</strong> @item.Size</div>
+                                        <div><strong>Crust:</strong> @item.CrustType</div>
+                                        <div><strong>Sauce:</strong> @item.Sauce</div>
+                                        @if (item.ToppingIds.Any())
+                                        {
+                                            <div>
+                                                <strong>Toppings:</strong> 
+                                                @string.Join(", ", GetToppingNames(item.ToppingIds))
+                                            </div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(item.SpecialInstructions))
+                                        {
+                                            <div>
+                                                <strong>Instructions:</strong> @item.SpecialInstructions
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <!-- Quantity Controls -->
+                                        <div class="input-group" style="max-width: 120px;">
+                                            <button class="btn btn-outline-secondary btn-sm" 
+                                                    @onclick="() => UpdateQuantity(item.CartItemId, item.Quantity - 1)">
+                                                <i class="bi bi-dash"></i>
+                                            </button>
+                                            <input type="text" class="form-control form-control-sm text-center" 
+                                                   value="@item.Quantity" readonly />
+                                            <button class="btn btn-outline-secondary btn-sm" 
+                                                    @onclick="() => UpdateQuantity(item.CartItemId, item.Quantity + 1)">
+                                                <i class="bi bi-plus"></i>
+                                            </button>
+                                        </div>
+                                        <!-- Price -->
+                                        <div class="ms-3">
+                                            <div class="fw-bold text-primary">
+                                                $@((item.Price * item.Quantity).ToString("F2"))
+                                            </div>
+                                            <small class="text-muted">
+                                                $@item.Price.ToString("F2") each
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <!-- Remove Button -->
+                                    <button class="btn btn-sm btn-outline-danger mt-2 w-100" 
+                                            @onclick="() => RemoveItem(item.CartItemId)">
+                                        <i class="bi bi-trash"></i> Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Continue Shopping Button -->
+                <button class="btn btn-outline-primary" @onclick="GoToMenu">
+                    <i class="bi bi-arrow-left"></i> Continue Shopping
+                </button>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm sticky-top" style="top: 20px;">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Order Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Promo Code -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Promo Code</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" 
+                                       placeholder="Enter code" 
+                                       @bind="promoCode" />
+                                <button class="btn btn-outline-secondary" 
+                                        @onclick="ApplyPromoCode"
+                                        disabled="@applyingPromo">
+                                    Apply
+                                </button>
+                            </div>
+                            @if (!string.IsNullOrEmpty(promoMessage))
+                            {
+                                <small class="@(promoValid ? "text-success" : "text-danger")">
+                                    @promoMessage
+                                </small>
+                            }
+                        </div>
+
+                        <hr />
+
+                        <!-- Price Breakdown -->
+                        <div class="mb-2 d-flex justify-content-between">
+                            <span>Subtotal:</span>
+                            <span>$@subtotal.ToString("F2")</span>
+                        </div>
+
+                        @if (discount > 0)
+                        {
+                            <div class="mb-2 d-flex justify-content-between text-success">
+                                <span>Discount:</span>
+                                <span>-$@discount.ToString("F2")</span>
+                            </div>
+                        }
+
+                        <div class="mb-2 d-flex justify-content-between">
+                            <span>Tax (8%):</span>
+                            <span>$@tax.ToString("F2")</span>
+                        </div>
+
+                        <div class="mb-2 d-flex justify-content-between">
+                            <span>Delivery Fee:</span>
+                            <span>$@deliveryFee.ToString("F2")</span>
+                        </div>
+
+                        <hr />
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">Total:</h5>
+                            <h4 class="mb-0 text-primary fw-bold">
+                                $@total.ToString("F2")
+                            </h4>
+                        </div>
+
+                        <!-- Checkout Button -->
+                        <div class="d-grid">
+                            <button class="btn btn-primary btn-lg" @onclick="ProceedToCheckout">
+                                <i class="bi bi-credit-card"></i> Proceed to Checkout
+                            </button>
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <small class="text-muted">
+                                <i class="bi bi-shield-check"></i> Secure Checkout
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<CartItem> cartItems = new();
+    private List<Topping> allToppings = new();
+    private string promoCode = string.Empty;
+    private string promoMessage = string.Empty;
+    private bool promoValid = false;
+    private bool applyingPromo = false;
+
+    private const decimal TAX_RATE = 0.08m;
+    private const decimal DELIVERY_FEE = 4.99m;
+
+    private decimal subtotal => cartItems.Sum(item => item.Price * item.Quantity);
+    private decimal discount = 0;
+    private decimal tax => (subtotal - discount) * TAX_RATE;
+    private decimal deliveryFee => subtotal > 0 ? DELIVERY_FEE : 0;
+    private decimal total => subtotal - discount + tax + deliveryFee;
+
+    protected override async Task OnInitializedAsync()
+    {
+        LoadCart();
+        await LoadToppings();
+    }
+
+    private void LoadCart()
+    {
+        cartItems = CartService.GetCart();
+    }
+
+    private async Task LoadToppings()
+    {
+        allToppings = await ToppingService.GetAllToppingsAsync();
+    }
+
+    private List<string> GetToppingNames(List<int> toppingIds)
+    {
+        return allToppings
+            .Where(t => toppingIds.Contains(t.ToppingId))
+            .Select(t => t.Name)
+            .ToList();
+    }
+
+    private void UpdateQuantity(int cartItemId, int newQuantity)
+    {
+        if (newQuantity < 1)
+        {
+            RemoveItem(cartItemId);
+        }
+        else if (newQuantity <= 10)
+        {
+            CartService.UpdateQuantity(cartItemId, newQuantity);
+            LoadCart();
+        }
+    }
+
+    private void RemoveItem(int cartItemId)
+    {
+        CartService.RemoveFromCart(cartItemId);
+        LoadCart();
+        promoMessage = string.Empty;
+        discount = 0;
+    }
+
+    private async Task ApplyPromoCode()
+    {
+        if (string.IsNullOrWhiteSpace(promoCode))
+        {
+            promoMessage = "Please enter a promo code";
+            promoValid = false;
+            return;
+        }
+
+        applyingPromo = true;
+        var promo = await PromoCodeService.ValidatePromoCodeAsync(promoCode.Trim().ToUpper(), subtotal);
+        
+        if (promo != null)
+        {
+            discount = subtotal * (promo.DiscountPercent / 100);
+            
+            if (promo.MaxDiscountAmount.HasValue)
+            {
+                discount = Math.Min(discount, promo.MaxDiscountAmount.Value);
+            }
+
+            promoMessage = $"Promo code applied! You saved ${discount:F2}";
+            promoValid = true;
+        }
+        else
+        {
+            promoMessage = "Invalid or expired promo code";
+            promoValid = false;
+            discount = 0;
+        }
+
+        applyingPromo = false;
+    }
+
+    private void GoToMenu()
+    {
+        Navigation.NavigateTo("/menu");
+    }
+
+    private void ProceedToCheckout()
+    {
+        if (!cartItems.Any())
+        {
+            return;
+        }
+
+        // Navigate to checkout page
+        Navigation.NavigateTo("/checkout");
+    }
+}
