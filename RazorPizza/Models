@@ -1,0 +1,200 @@
+// File: ApplicationUser.cs
+using Microsoft.AspNetCore.Identity;
+
+namespace RazorPizza.Models;
+
+public class ApplicationUser : IdentityUser
+{
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+    
+    // Navigation properties
+    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+    public virtual ICollection<Address> Addresses { get; set; } = new List<Address>();
+}
+
+// File: Pizza.cs
+namespace RazorPizza.Models;
+
+public class Pizza
+{
+    public int PizzaId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public decimal BasePrice { get; set; }
+    public string ImageUrl { get; set; } = "/images/default-pizza.jpg";
+    public string Category { get; set; } = "Custom"; // Specialty, Custom, Vegetarian, etc.
+    public bool IsAvailable { get; set; } = true;
+    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+    
+    // Navigation properties
+    public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+}
+
+// File: Topping.cs
+namespace RazorPizza.Models;
+
+public class Topping
+{
+    public int ToppingId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public decimal Price { get; set; }
+    public string Category { get; set; } = "Other"; // Meat, Vegetable, Cheese, Sauce, Other
+    public bool IsAvailable { get; set; } = true;
+    public string ImageUrl { get; set; } = "/images/toppings/default.jpg";
+}
+
+// File: Order.cs
+namespace RazorPizza.Models;
+
+public class Order
+{
+    public int OrderId { get; set; }
+    public string UserId { get; set; } = string.Empty;
+    public DateTime OrderDate { get; set; } = DateTime.UtcNow;
+    public decimal SubTotal { get; set; }
+    public decimal Tax { get; set; }
+    public decimal DeliveryFee { get; set; }
+    public decimal TotalAmount { get; set; }
+    public string Status { get; set; } = "Pending"; // Pending, Preparing, Baking, Delivering, Completed, Cancelled
+    public string DeliveryAddress { get; set; } = string.Empty;
+    public string PaymentMethod { get; set; } = string.Empty;
+    public string? Notes { get; set; }
+    public string? PromoCode { get; set; }
+    public decimal Discount { get; set; }
+    
+    // Navigation properties
+    public virtual ApplicationUser? User { get; set; }
+    public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+}
+
+// File: OrderItem.cs
+namespace RazorPizza.Models;
+
+public class OrderItem
+{
+    public int OrderItemId { get; set; }
+    public int OrderId { get; set; }
+    public int? PizzaId { get; set; }
+    public int Quantity { get; set; } = 1;
+    public string Size { get; set; } = "Medium"; // Small, Medium, Large, ExtraLarge
+    public string CrustType { get; set; } = "Regular"; // Thin, Regular, Thick, Stuffed
+    public string Sauce { get; set; } = "Tomato"; // Tomato, White, BBQ, Pesto, None
+    public string? CustomToppings { get; set; } // JSON string of topping IDs
+    public decimal Price { get; set; }
+    public string? SpecialInstructions { get; set; }
+    
+    // Navigation properties
+    public virtual Order? Order { get; set; }
+    public virtual Pizza? Pizza { get; set; }
+}
+
+// File: Address.cs
+namespace RazorPizza.Models;
+
+public class Address
+{
+    public int AddressId { get; set; }
+    public string UserId { get; set; } = string.Empty;
+    public string Label { get; set; } = "Home"; // Home, Work, Other
+    public string Street { get; set; } = string.Empty;
+    public string? Apartment { get; set; }
+    public string City { get; set; } = string.Empty;
+    public string State { get; set; } = string.Empty;
+    public string ZipCode { get; set; } = string.Empty;
+    public bool IsDefault { get; set; } = false;
+    
+    // Navigation property
+    public virtual ApplicationUser? User { get; set; }
+}
+
+// File: PromoCode.cs
+namespace RazorPizza.Models;
+
+public class PromoCode
+{
+    public int PromoCodeId { get; set; }
+    public string Code { get; set; } = string.Empty;
+    public decimal DiscountPercent { get; set; }
+    public decimal? MaxDiscountAmount { get; set; }
+    public decimal? MinOrderAmount { get; set; }
+    public DateTime StartDate { get; set; } = DateTime.UtcNow;
+    public DateTime ExpiryDate { get; set; }
+    public bool IsActive { get; set; } = true;
+    public int? UsageLimit { get; set; }
+    public int UsageCount { get; set; } = 0;
+}
+
+// File: CartItem.cs (For session-based cart)
+namespace RazorPizza.Models;
+
+public class CartItem
+{
+    public int CartItemId { get; set; }
+    public int? PizzaId { get; set; }
+    public string PizzaName { get; set; } = string.Empty;
+    public string Size { get; set; } = "Medium";
+    public string CrustType { get; set; } = "Regular";
+    public string Sauce { get; set; } = "Tomato";
+    public List<int> ToppingIds { get; set; } = new();
+    public int Quantity { get; set; } = 1;
+    public decimal Price { get; set; }
+    public string? SpecialInstructions { get; set; }
+}
+
+// File: PizzaSize.cs (Enum-like configuration)
+namespace RazorPizza.Models;
+
+public static class PizzaSizes
+{
+    public static Dictionary<string, decimal> SizePriceMultipliers = new()
+    {
+        { "Small", 0.75m },
+        { "Medium", 1.0m },
+        { "Large", 1.35m },
+        { "ExtraLarge", 1.65m }
+    };
+    
+    public static Dictionary<string, string> SizeDescriptions = new()
+    {
+        { "Small", "10\" - 6 slices" },
+        { "Medium", "12\" - 8 slices" },
+        { "Large", "14\" - 10 slices" },
+        { "ExtraLarge", "16\" - 12 slices" }
+    };
+}
+
+// File: CrustTypes.cs
+namespace RazorPizza.Models;
+
+public static class CrustTypes
+{
+    public static Dictionary<string, decimal> CrustPrices = new()
+    {
+        { "Thin", 0.0m },
+        { "Regular", 0.0m },
+        { "Thick", 0.0m },
+        { "Stuffed", 2.0m }
+    };
+}
+
+// File: OrderStatus.cs
+namespace RazorPizza.Models;
+
+public static class OrderStatuses
+{
+    public const string Pending = "Pending";
+    public const string Preparing = "Preparing";
+    public const string Baking = "Baking";
+    public const string QualityCheck = "Quality Check";
+    public const string OutForDelivery = "Out for Delivery";
+    public const string Delivered = "Delivered";
+    public const string Completed = "Completed";
+    public const string Cancelled = "Cancelled";
+    
+    public static List<string> AllStatuses = new()
+    {
+        Pending, Preparing, Baking, QualityCheck, OutForDelivery, Delivered, Completed, Cancelled
+    };
+}
