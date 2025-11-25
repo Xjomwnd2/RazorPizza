@@ -1,0 +1,172 @@
+@page "/menu"
+@using RazorPizza.Models
+@using RazorPizza.Services
+@inject IPizzaService PizzaService
+@inject NavigationManager Navigation
+
+<PageTitle>Pizza Menu - Razor Pizza</PageTitle>
+
+<div class="container my-5">
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h1 class="display-4 fw-bold text-primary">🍕 Our Menu</h1>
+            <p class="lead text-muted">Choose from our specialty pizzas or build your own!</p>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="row mb-4">
+        <div class="col-md-6 mx-auto">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Search pizzas..." 
+                       @bind="searchTerm" @bind:event="oninput" />
+                <button class="btn btn-primary" @onclick="SearchPizzas">
+                    <i class="bi bi-search"></i> Search
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Filter -->
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <div class="btn-group" role="group">
+                <button class="btn @(selectedCategory == "All" ? "btn-primary" : "btn-outline-primary")" 
+                        @onclick='() => FilterByCategory("All")'>
+                    All
+                </button>
+                <button class="btn @(selectedCategory == "Specialty" ? "btn-primary" : "btn-outline-primary")" 
+                        @onclick='() => FilterByCategory("Specialty")'>
+                    Specialty
+                </button>
+                <button class="btn @(selectedCategory == "Vegetarian" ? "btn-primary" : "btn-outline-primary")" 
+                        @onclick='() => FilterByCategory("Vegetarian")'>
+                    Vegetarian
+                </button>
+                <button class="btn @(selectedCategory == "Custom" ? "btn-primary" : "btn-outline-primary")" 
+                        @onclick='() => FilterByCategory("Custom")'>
+                    Build Your Own
+                </button>
+            </div>
+        </div>
+    </div>
+
+    @if (loading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3">Loading delicious pizzas...</p>
+        </div>
+    }
+    else if (!filteredPizzas.Any())
+    {
+        <div class="alert alert-info text-center">
+            <i class="bi bi-info-circle"></i> No pizzas found matching your criteria.
+        </div>
+    }
+    else
+    {
+        <!-- Pizza Grid -->
+        <div class="row g-4">
+            @foreach (var pizza in filteredPizzas)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm pizza-card">
+                        <img src="@pizza.ImageUrl" class="card-img-top" alt="@pizza.Name" 
+                             style="height: 250px; object-fit: cover;" />
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold">@pizza.Name</h5>
+                            <p class="card-text text-muted small flex-grow-1">@pizza.Description</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="h5 mb-0 text-primary">
+                                    $@pizza.BasePrice.ToString("F2")
+                                </span>
+                                <button class="btn btn-primary" @onclick="() => ViewPizza(pizza.PizzaId)">
+                                    <i class="bi bi-eye"></i> View Details
+                                </button>
+                            </div>
+                        </div>
+                        @if (pizza.Category != "Custom")
+                        {
+                            <div class="card-footer bg-light">
+                                <small class="text-muted">
+                                    <i class="bi bi-tag"></i> @pizza.Category
+                                </small>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .pizza-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .pizza-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
+    }
+</style>
+
+@code {
+    private List<Pizza> allPizzas = new();
+    private List<Pizza> filteredPizzas = new();
+    private string searchTerm = string.Empty;
+    private string selectedCategory = "All";
+    private bool loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPizzas();
+    }
+
+    private async Task LoadPizzas()
+    {
+        loading = true;
+        allPizzas = await PizzaService.GetAllPizzasAsync();
+        filteredPizzas = allPizzas;
+        loading = false;
+    }
+
+    private void FilterByCategory(string category)
+    {
+        selectedCategory = category;
+        ApplyFilters();
+    }
+
+    private void SearchPizzas()
+    {
+        ApplyFilters();
+    }
+
+    private void ApplyFilters()
+    {
+        filteredPizzas = allPizzas;
+
+        // Apply category filter
+        if (selectedCategory != "All")
+        {
+            filteredPizzas = filteredPizzas.Where(p => p.Category == selectedCategory).ToList();
+        }
+
+        // Apply search filter
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            filteredPizzas = filteredPizzas.Where(p => 
+                p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                p.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+            ).ToList();
+        }
+    }
+
+    private void ViewPizza(int pizzaId)
+    {
+        Navigation.NavigateTo($"/pizza/{pizzaId}");
+    }
+}
