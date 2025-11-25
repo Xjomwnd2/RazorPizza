@@ -16,3 +16,8 @@ public class Order
     public string? Notes { get; set; }
     public string? PromoCode { get; set; }
     public decimal Discount { get; set; }
+    
+    // Navigation properties
+    public virtual ApplicationUser? User { get; set; }
+    public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+}
