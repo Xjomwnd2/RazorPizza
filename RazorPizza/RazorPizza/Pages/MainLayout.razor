@@ -1,13 +1,7 @@
 @inherits LayoutComponentBase
-@using Microsoft.AspNetCore.Components.Routing
-@using RazorPizza.Shared
+@using RazorPizza.Pages.Shared
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <main>
-        @Body
-    </main>
+<div class="main-layout">
+    <NavMenu />
+    @Body
 </div>
