@@ -1,0 +1,29 @@
+using Microsoft.EntityFrameworkCore;
+using RazorPizza.Data;
+using RazorPizza.Models;
+
+namespace RazorPizza.Services;
+
+public class PromoCodeService : IPromoCodeService
+{
+    private readonly PizzaDbContext _context;
+
+    public PromoCodeService(PizzaDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<PromoCode?> ValidatePromoCodeAsync(string code)
+    {
+        return await _context.PromoCodes
+            .FirstOrDefaultAsync(p => p.Code == code && p.IsActive);
+    }
+
+    public decimal ApplyDiscount(decimal amount, PromoCode promoCode)
+    {
+        if (promoCode.DiscountType == "Percentage")
+            return amount * (1 - promoCode.DiscountValue / 100);
+        else
+            return amount - promoCode.DiscountValue;
+    }
+}
