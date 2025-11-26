@@ -1,19 +1,12 @@
-cat > Data/PizzaDbContext.cs << 'EOF'
-using Microsoft.EntityFrameworkCore;
 using RazorPizza.Models;
 
-namespace RazorPizza.Data;
+namespace RazorPizza.Services;
 
-public class PizzaDbContext : DbContext
+public interface IPizzaService
 {
-    public PizzaDbContext(DbContextOptions<PizzaDbContext> options) : base(options)
-    {
-    }
-
-    public DbSet<Pizza> Pizzas { get; set; }
-    public DbSet<Order> Orders { get; set; }
-    public DbSet<OrderItem> OrderItems { get; set; }
-    public DbSet<PromoCode> PromoCodes { get; set; }
-    public DbSet<Topping> Toppings { get; set; }
+    Task<List<Pizza>> GetAllPizzasAsync();
+    Task<Pizza?> GetPizzaByIdAsync(int pizzaId);
+    Task<Pizza> CreatePizzaAsync(Pizza pizza);
+    Task UpdatePizzaAsync(Pizza pizza);
+    Task DeletePizzaAsync(int pizzaId);
 }
-EOF
