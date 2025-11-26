@@ -1,11 +1,17 @@
+using Microsoft.EntityFrameworkCore;
+using RazorPizza.Models;
 
-protected override void OnModelCreating(ModelBuilder builder)
+namespace RazorPizza.Data;
+
+public class PizzaDbContext : DbContext
 {
-    base.OnModelCreating(builder);
-
-    builder.Entity<ApplicationUser>(entity =>
+    public PizzaDbContext(DbContextOptions<PizzaDbContext> options) : base(options)
     {
-        entity.Property(e => e.Id)
-              .HasColumnType("nvarchar(450)");
-    });
+    }
+
+    public DbSet<Pizza> Pizzas { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<PromoCode> PromoCodes { get; set; }
+    public DbSet<Topping> Toppings { get; set; }
 }
