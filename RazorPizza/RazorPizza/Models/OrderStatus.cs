@@ -16,3 +16,4 @@ public static class OrderStatuses
     {
         Pending, Preparing, Baking, QualityCheck, OutForDelivery, Delivered, Completed, Cancelled
     };
+} // <-- ADD THIS CLOSING BRACE
