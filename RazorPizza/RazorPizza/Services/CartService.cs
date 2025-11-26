@@ -2,7 +2,7 @@ using RazorPizza.Models;
 
 namespace RazorPizza.Services;
 
-public class CartService : ICartService
+public class CartService 
 {
     private List<CartItem> _cart = new();
 
