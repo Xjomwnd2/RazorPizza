@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using RazorPizza.Data;
 using RazorPizza.Services;
+using RazorPizza.Models;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
