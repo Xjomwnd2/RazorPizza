@@ -4,7 +4,6 @@ using RazorPizza.Data;
 using RazorPizza.Services;
 using RazorPizza.Models;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
@@ -32,11 +31,21 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
-// Ensure database is created
+// Seed the database
 using (var scope = app.Services.CreateScope())
 {
-    var context = scope.ServiceProvider.GetRequiredService<PizzaDbContext>();
-    context.Database.EnsureCreated();
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<PizzaDbContext>();
+        context.Database.EnsureCreated();
+        DbInitializer.Initialize(context);
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred seeding the DB.");
+    }
 }
 
 // Configure the HTTP request pipeline
@@ -50,7 +59,6 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
-
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
