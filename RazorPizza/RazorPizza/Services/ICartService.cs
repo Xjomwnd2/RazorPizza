@@ -1,4 +1,3 @@
-cat > Services/ICartService.cs << 'EOF'
 using RazorPizza.Models;
 
 namespace RazorPizza.Services;
@@ -12,4 +11,3 @@ public interface ICartService
     void ClearCart();
     decimal GetCartTotal();
 }
-EOF
