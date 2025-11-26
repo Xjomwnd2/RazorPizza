@@ -29,3 +29,411 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+/*/////////////////////////////////////////////////////////////////////////////*/
+cat > wwwroot/css/site.css << 'EOF'
+/* ============================================
+   RazorPizza - Modern Pizza Shop Styling
+   ============================================ */
+
+/* === ROOT VARIABLES === */
+:root {
+    --primary-color: #e74c3c;
+    --primary-hover: #c0392b;
+    --secondary-color: #f39c12;
+    --success-color: #27ae60;
+    --dark-bg: #2c3e50;
+    --light-bg: #ecf0f1;
+    --text-dark: #2c3e50;
+    --text-light: #7f8c8d;
+    --border-radius: 12px;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-hover: 0 8px 15px rgba(0, 0, 0, 0.2);
+    --transition: all 0.3s ease;
+}
+
+/* === GLOBAL STYLES === */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    color: var(--text-dark);
+    line-height: 1.6;
+}
+
+/* === PAGE LAYOUT === */
+.page {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* === SIDEBAR NAVIGATION === */
+.sidebar {
+    width: 260px;
+    background: var(--dark-bg);
+    color: white;
+    padding: 2rem 0;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.sidebar .top-row {
+    padding: 0 1.5rem 1.5rem;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 1rem;
+}
+
+.navbar-brand {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--secondary-color) !important;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.navbar-brand::before {
+    content: "🍕";
+    font-size: 2rem;
+}
+
+/* === NAVIGATION LINKS === */
+.nav-scrollable {
+    padding: 0 1rem;
+}
+
+.nav-item {
+    margin-bottom: 0.5rem;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    font-size: 1rem;
+}
+
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    transform: translateX(5px);
+}
+
+.nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* === MAIN CONTENT === */
+main {
+    flex: 1;
+    margin-left: 260px;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.95);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* === HEADER STYLES === */
+.display-4 {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.lead {
+    font-size: 1.25rem;
+    color: var(--text-light);
+    margin-bottom: 2rem;
+}
+
+/* === SEARCH BAR === */
+.input-group {
+    box-shadow: var(--shadow);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.input-group .form-control {
+    border: 2px solid #e0e0e0;
+    padding: 0.75rem 1.25rem;
+    font-size: 1rem;
+    border-right: none;
+}
+
+.input-group .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: none;
+}
+
+.input-group .btn {
+    padding: 0.75rem 1.5rem;
+    border: 2px solid var(--primary-color);
+    background: var(--primary-color);
+    color: white;
+    font-weight: 600;
+}
+
+/* === CATEGORY FILTERS === */
+.btn-group {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.btn-group .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    border: 2px solid var(--primary-color);
+    transition: var(--transition);
+}
+
+.btn-outline-primary {
+    background: white;
+    color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover);
+    border-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+/* === PIZZA CARDS === */
+.pizza-card {
+    border: none;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    transition: var(--transition);
+    background: white;
+    height: 100%;
+}
+
+.pizza-card:hover {
+    transform: translateY(-10px);
+    box-shadow: var(--shadow-hover);
+}
+
+.pizza-card .card-img-top {
+    height: 250px;
+    object-fit: cover;
+    transition: var(--transition);
+}
+
+.pizza-card:hover .card-img-top {
+    transform: scale(1.1);
+}
+
+.pizza-card .card-body {
+    padding: 1.5rem;
+}
+
+.pizza-card .card-title {
+    font-size: 1.5rem;
+    color: var(--text-dark);
+    margin-bottom: 0.75rem;
+}
+
+.pizza-card .card-text {
+    color: var(--text-light);
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+}
+
+.pizza-card .card-footer {
+    background: var(--light-bg);
+    border-top: 2px solid #e0e0e0;
+    padding: 0.75rem 1.5rem;
+}
+
+/* === PRICE TAG === */
+.h5.text-primary {
+    color: var(--primary-color) !important;
+    font-weight: 700;
+    font-size: 1.75rem;
+}
+
+/* === ALERTS === */
+.alert {
+    border-radius: var(--border-radius);
+    padding: 1.25rem;
+    border: none;
+    box-shadow: var(--shadow);
+}
+
+.alert-info {
+    background: #d4edff;
+    color: #0066cc;
+}
+
+/* === LOADING SPINNER === */
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+    border-width: 0.3rem;
+}
+
+/* === ERROR MESSAGES === */
+#blazor-error-ui {
+    background: #ffebee;
+    color: #c62828;
+    padding: 1rem;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+#blazor-error-ui .reload {
+    background: var(--primary-color);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    font-size: 1.5rem;
+    padding: 0.25rem 0.75rem;
+}
+
+/* === GRID SYSTEM === */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -0.75rem;
+}
+
+.col-12, .col-md-6, .col-lg-4 {
+    padding: 0 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.col-12 { width: 100%; }
+
+/* === UTILITY CLASSES === */
+.text-center { text-align: center; }
+.text-muted { color: var(--text-light) !important; }
+.fw-bold { font-weight: 700; }
+.my-5 { margin: 3rem 0; }
+.mb-4 { margin-bottom: 2rem; }
+.mt-3 { margin-top: 1rem; }
+.py-5 { padding: 3rem 0; }
+.shadow-sm { box-shadow: var(--shadow); }
+.d-flex { display: flex; }
+.flex-column { flex-direction: column; }
+.flex-grow-1 { flex-grow: 1; }
+.justify-content-between { justify-content: space-between; }
+.align-items-center { align-items: center; }
+.g-4 { gap: 1.5rem; }
+
+/* === RESPONSIVE DESIGN === */
+@media (min-width: 768px) {
+    .col-md-6 { width: 50%; }
+}
+
+@media (min-width: 992px) {
+    .col-lg-4 { width: 33.333%; }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+    }
+    
+    main {
+        margin-left: 0;
+    }
+    
+    .display-4 {
+        font-size: 2rem;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+    }
+}
+
+/* === ANIMATIONS === */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.pizza-card {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* === CUSTOM SCROLLBAR === */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-hover);
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
