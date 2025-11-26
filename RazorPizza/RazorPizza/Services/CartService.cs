@@ -6,7 +6,7 @@ public class CartService : ICartService
 {
     private List<CartItem> _cart = new();
 
-    public List<CartItem> GetCartItems() => _cart;
+    public List<CartItem> GetCart() => _cart;
 
     public void AddToCart(CartItem item)
     {
