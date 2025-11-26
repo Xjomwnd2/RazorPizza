@@ -8,13 +8,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
-// Configure Database
+// Configure Database (SQL Server)
 builder.Services.AddDbContext<PizzaDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-
-builder.Services.AddDbContext<PizzaDbContext>(options =>
-    options.UseSqlite(connectionString));
 
 // Register application services
 builder.Services.AddScoped<IPizzaService, PizzaService>();
