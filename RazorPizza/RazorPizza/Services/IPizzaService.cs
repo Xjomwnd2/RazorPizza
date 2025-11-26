@@ -1,4 +1,3 @@
-cat > Services/IPizzaService.cs << 'EOF'
 using RazorPizza.Models;
 
 namespace RazorPizza.Services;
@@ -11,4 +10,3 @@ public interface IPizzaService
     Task UpdatePizzaAsync(Pizza pizza);
     Task DeletePizzaAsync(int pizzaId);
 }
-EOF
