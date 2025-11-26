@@ -22,10 +22,6 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IPromoCodeService, PromoCodeService>();
 builder.Services.AddScoped<ICartService, CartService>();
 
-// Identity configuration
-builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
-                .AddEntityFrameworkStores<PizzaDbContext>();
-
 // Add session support
 builder.Services.AddSession(options =>
 {
