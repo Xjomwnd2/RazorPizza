@@ -1,7 +1,6 @@
 using RazorPizza.Models;
 
 namespace RazorPizza.Services;
-
 public interface ICartService
 {
     List<CartItem> GetCartItems();
