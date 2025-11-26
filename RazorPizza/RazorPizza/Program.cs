@@ -19,6 +19,10 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IPromoCodeService, PromoCodeService>();
 builder.Services.AddScoped<ICartService, CartService>();
 
+// Identity configuration
+builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
+                .AddEntityFrameworkStores<PizzaDbContext>();
+
 // Add session support
 builder.Services.AddSession(options =>
 {
@@ -52,3 +56,4 @@ app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
 app.Run();
+commit
