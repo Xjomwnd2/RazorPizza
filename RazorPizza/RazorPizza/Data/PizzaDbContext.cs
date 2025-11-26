@@ -1,41 +1,28 @@
-protected override void OnModelCreating(ModelBuilder modelBuilder)
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using RazorPizza.Models;
+
+namespace RazorPizza.Data;
+
+public class PizzaDbContext : IdentityDbContext<ApplicationUser>
 {
-    base.OnModelCreating(modelBuilder);
+    public PizzaDbContext(DbContextOptions<PizzaDbContext> options)
+        : base(options) { }
 
-    // Order entity
-    modelBuilder.Entity<Order>(entity =>
-    {
-        entity.Property(e => e.SubTotal).HasPrecision(18, 2);
-        entity.Property(e => e.Tax).HasPrecision(18, 2);
-        entity.Property(e => e.DeliveryFee).HasPrecision(18, 2);
-        entity.Property(e => e.Discount).HasPrecision(18, 2);
-        entity.Property(e => e.TotalAmount).HasPrecision(18, 2);
-    });
+    public DbSet<Pizza> Pizzas { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<PromoCode> PromoCodes { get; set; }
+    public DbSet<Topping> Toppings { get; set; }
 
-    // OrderItem entity
-    modelBuilder.Entity<OrderItem>(entity =>
+    protected override void OnModelCreating(ModelBuilder builder)
     {
-        entity.Property(e => e.Price).HasPrecision(18, 2);
-    });
+        base.OnModelCreating(builder);
 
-    // Pizza entity
-    modelBuilder.Entity<Pizza>(entity =>
-    {
-        entity.Property(e => e.BasePrice).HasPrecision(18, 2);
-    });
-
-    // PromoCode entity
-    modelBuilder.Entity<PromoCode>(entity =>
-    {
-        entity.Property(e => e.DiscountPercent).HasPrecision(5, 2);
-        entity.Property(e => e.DiscountValue).HasPrecision(18, 2);
-        entity.Property(e => e.MaxDiscountAmount).HasPrecision(18, 2);
-        entity.Property(e => e.MinOrderAmount).HasPrecision(18, 2);
-    });
-
-    // Topping entity
-    modelBuilder.Entity<Topping>(entity =>
-    {
-        entity.Property(e => e.Price).HasPrecision(18, 2);
-    });
+        // Ensure IdentityUser.Id is nvarchar(450) for SQL Server
+        builder.Entity<ApplicationUser>(b =>
+        {
+            b.Property(u => u.Id).HasMaxLength(450);
+        });
+    }
 }
