@@ -2,11 +2,14 @@ using RazorPizza.Models;
 
 namespace RazorPizza.Services;
 
-public class CartService 
+public class CartService : ICartService
 {
     private List<CartItem> _cart = new();
 
     public List<CartItem> GetCart() => _cart;
+
+    // This method was missing — add it
+    public List<CartItem> GetCartItems() => _cart;
 
     public void AddToCart(CartItem item)
     {
