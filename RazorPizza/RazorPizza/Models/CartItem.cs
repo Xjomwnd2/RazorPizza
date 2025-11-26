@@ -11,5 +11,6 @@ public class CartItem
     public List<int> ToppingIds { get; set; } = new();
     public int Quantity { get; set; } = 1;
     public decimal Price { get; set; }
+    public decimal TotalPrice => Price * Quantity;
     public string? SpecialInstructions { get; set; }
 }
