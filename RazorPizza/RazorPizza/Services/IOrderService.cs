@@ -1,4 +1,3 @@
-cat > Services/IOrderService.cs << 'EOF'
 using RazorPizza.Models;
 
 namespace RazorPizza.Services;
@@ -10,4 +9,3 @@ public interface IOrderService
     Task<Order> CreateOrderAsync(Order order);
     Task UpdateOrderStatusAsync(int orderId, string status);
 }
-EOF
