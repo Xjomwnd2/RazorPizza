@@ -4,6 +4,8 @@ public class PromoCode
 {
     public int PromoCodeId { get; set; }
     public string Code { get; set; } = string.Empty;
+    public string DiscountType { get; set; } = "Percentage"; // "Percentage" or "Fixed"
+    public decimal DiscountValue { get; set; } // Percentage or fixed amount
     public decimal DiscountPercent { get; set; }
     public decimal? MaxDiscountAmount { get; set; }
     public decimal? MinOrderAmount { get; set; }
