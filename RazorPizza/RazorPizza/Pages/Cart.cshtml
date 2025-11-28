@@ -1,0 +1,126 @@
+@page "/shoppingcart"
+@model RazorPizza.Pages.CartModel
+@{
+    ViewData["Title"] = "Shopping Cart";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">
+        <i class="bi bi-cart3"></i> Your Shopping Cart
+    </h2>
+
+    @if (!Model.CartItems.Any())
+    {
+        <div class="alert alert-info">
+            <h4>Your cart is empty</h4>
+            <p>Browse our <a asp-page="/Menu" class="alert-link">menu</a> to add some delicious pizzas!</p>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        @foreach (var item in Model.CartItems)
+                        {
+                            <div class="row mb-3 pb-3 border-bottom">
+                                <div class="col-md-8">
+                                    <h5>@item.PizzaName</h5>
+                                    @if (item.SelectedToppingIds.Any())
+                                    {
+                                        <p class="text-muted mb-1">
+                                            <small>
+                                                Toppings: @string.Join(", ", item.SelectedToppingIds)
+                                            </small>
+                                        </p>
+                                    }
+                                    <p class="mb-0">
+                                        <strong>$@item.TotalPrice.ToString("F2")</strong>
+                                    </p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <form method="post" class="d-inline-block">
+                                        <div class="input-group input-group-sm mb-2" style="max-width: 120px; float: right;">
+                                            <button type="submit" class="btn btn-outline-secondary" 
+                                                    asp-page-handler="UpdateQuantity" 
+                                                    asp-route-pizzaId="@item.PizzaId" 
+                                                    asp-route-quantity="@(item.Quantity - 1)">
+                                                <i class="bi bi-dash"></i>
+                                            </button>
+                                            <input type="text" class="form-control text-center" 
+                                                   value="@item.Quantity" readonly>
+                                            <button type="submit" class="btn btn-outline-secondary" 
+                                                    asp-page-handler="UpdateQuantity" 
+                                                    asp-route-pizzaId="@item.PizzaId" 
+                                                    asp-route-quantity="@(item.Quantity + 1)">
+                                                <i class="bi bi-plus"></i>
+                                            </button>
+                                        </div>
+                                    </form>
+                                    <form method="post" class="d-inline-block">
+                                        <button type="submit" class="btn btn-sm btn-danger" 
+                                                asp-page-handler="RemoveItem" 
+                                                asp-route-pizzaId="@item.PizzaId">
+                                            <i class="bi bi-trash"></i> Remove
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Order Summary</h5>
+                        <hr>
+                        
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal:</span>
+                            <strong>$@Model.CartTotal.ToString("F2")</strong>
+                        </div>
+
+                        <form method="post" class="mb-3">
+                            <div class="input-group input-group-sm">
+                                <input type="text" name="promoCode" class="form-control" 
+                                       placeholder="Promo code" asp-for="PromoCode">
+                                <button type="submit" class="btn btn-outline-secondary" 
+                                        asp-page-handler="ApplyPromo">
+                                    Apply
+                                </button>
+                            </div>
+                        </form>
+
+                        @if (!string.IsNullOrEmpty(Model.Message))
+                        {
+                            <div class="alert alert-info alert-sm">
+                                @Model.Message
+                            </div>
+                        }
+
+                        <hr>
+                        
+                        <div class="d-flex justify-content-between mb-3">
+                            <h5>Total:</h5>
+                            <h5>$@Model.CartTotal.ToString("F2")</h5>
+                        </div>
+
+                        <form method="post">
+                            <button type="submit" class="btn btn-primary w-100 mb-2" 
+                                    asp-page-handler="Checkout">
+                                <i class="bi bi-credit-card"></i> Proceed to Checkout
+                            </button>
+                        </form>
+
+                        <a asp-page="/Menu" class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-arrow-left"></i> Continue Shopping
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
