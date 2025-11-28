@@ -8,12 +8,10 @@ namespace RazorPizza.Pages
     public class CartModel : PageModel
     {
         private readonly ICartService _cartService;
-        private readonly IPromoCodeService _promoCodeService;
 
-        public CartModel(ICartService cartService, IPromoCodeService promoCodeService)
+        public CartModel(ICartService cartService)
         {
             _cartService = cartService;
-            _promoCodeService = promoCodeService;
         }
 
         public List<CartItem> CartItems { get; set; } = new List<CartItem>();
@@ -41,19 +39,12 @@ namespace RazorPizza.Pages
             return RedirectToPage();
         }
 
-        public async Task<IActionResult> OnPostApplyPromo()
+        public IActionResult OnPostApplyPromo()
         {
             if (!string.IsNullOrEmpty(PromoCode))
             {
-                var discount = await _promoCodeService.ValidateAndCalculateDiscountAsync(PromoCode, CartTotal);
-                if (discount > 0)
-                {
-                    Message = $"Promo code applied! You saved ${discount:F2}";
-                }
-                else
-                {
-                    Message = "Invalid or expired promo code.";
-                }
+                // TODO: Implement promo code validation
+                Message = "Promo code feature coming soon!";
             }
             LoadCart();
             return Page();
@@ -68,8 +59,9 @@ namespace RazorPizza.Pages
             }
 
             // TODO: Implement checkout logic
-            // For now, just redirect to a confirmation page or clear cart
-            return RedirectToPage("/OrderConfirmation");
+            // For now, just clear the cart
+            _cartService.ClearCart();
+            return RedirectToPage("/Index");
         }
 
         private void LoadCart()
