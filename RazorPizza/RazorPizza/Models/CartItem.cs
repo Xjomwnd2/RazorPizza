@@ -24,9 +24,7 @@ namespace RazorPizza.Models
         // Toppings used by services
         public List<int> SelectedToppingIds { get; set; } = new();
         public List<Topping> SelectedToppings { get; set; } = new();
-
         // Extra notes from customer
-        public string SpecialInstructions { get; set; }
 
         // Auto-calculated total
         public decimal TotalPrice
