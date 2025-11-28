@@ -77,8 +77,8 @@ namespace RazorPizza.Services
             }
 
             SaveCart(cartItems);
-        }
-
+        
+            }
         // Remove item from cart
         public void RemoveFromCart(int pizzaId)
         {
