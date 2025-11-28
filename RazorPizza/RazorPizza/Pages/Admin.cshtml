@@ -48,9 +48,7 @@
                                     <th>ID</th>
                                     <th>Name</th>
                                     <th>Description</th>
-                                    <th>Base Price</th>
-                                    <th>Category</th>
-                                    <th>Available</th>
+                                    <th>Price</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -61,18 +59,7 @@
                                         <td>@pizza.PizzaId</td>
                                         <td>@pizza.Name</td>
                                         <td>@pizza.Description</td>
-                                        <td>$@pizza.BasePrice.ToString("F2")</td>
-                                        <td><span class="badge bg-info">@pizza.Category</span></td>
-                                        <td>
-                                            @if (pizza.IsAvailable)
-                                            {
-                                                <span class="badge bg-success">Yes</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge bg-danger">No</span>
-                                            }
-                                        </td>
+                                        <td>$@pizza.Price.ToString("F2")</td>
                                         <td>
                                             <button class="btn btn-sm btn-warning">
                                                 <i class="bi bi-pencil"></i> Edit
@@ -154,6 +141,19 @@
                                             <button class="btn btn-sm btn-info" title="View Details">
                                                 <i class="bi bi-eye"></i>
                                             </button>
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                                    Update Status
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#">Preparing</a></li>
+                                                    <li><a class="dropdown-item" href="#">Baking</a></li>
+                                                    <li><a class="dropdown-item" href="#">Delivering</a></li>
+                                                    <li><a class="dropdown-item" href="#">Completed</a></li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li><a class="dropdown-item text-danger" href="#">Cancel</a></li>
+                                                </ul>
+                                            </div>
                                         </td>
                                     </tr>
                                 }
@@ -172,42 +172,3 @@
                     <button class="btn btn-primary btn-sm">
                         <i class="bi bi-plus-circle"></i> Add Topping
                     </button>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Category</th>
-                                    <th>Price</th>
-                                    <th>Available</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var topping in Model.Toppings)
-                                {
-                                    <tr>
-                                        <td>@topping.ToppingId</td>
-                                        <td>@topping.Name</td>
-                                        <td>
-                                            <span class="badge bg-secondary">@topping.Category</span>
-                                        </td>
-                                        <td>$@topping.Price.ToString("F2")</td>
-                                        <td>
-                                            @if (topping.IsAvailable)
-                                            {
-                                                <span class="badge bg-success">Yes</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge bg-danger">No</span>
-                                            }
-                                        </td>
-                                        <td>
-                                            <button class="btn btn-sm btn-warning">
-                                                <i class="bi bi-pencil"></i> Edit
-                                            </button>
-                                            <button class="btn btn-sm btn-danger">
