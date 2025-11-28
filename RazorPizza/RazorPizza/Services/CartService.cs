@@ -1,284 +1,193 @@
-// Services/CartService.cs
-public class CartService : ICartService
+using Microsoft.EntityFrameworkCore;
+using RazorPizza.Data;
+using RazorPizza.Models;
+using System.Text.Json;
+
+namespace RazorPizza.Services
 {
-    private readonly IPizzaService _pizzaService;
-    private readonly IToppingService _toppingService;
-    private readonly IPromoCodeService _promoCodeService;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly ApplicationDbContext _context; // For logged-in users
-    
-    // Session key for cart storage
-    private const string CartSessionKey = "ShoppingCart";
-
-    public CartService(
-        IPizzaService pizzaService,
-        IToppingService toppingService,
-        IPromoCodeService promoCodeService,
-        IHttpContextAccessor httpContextAccessor,
-        ApplicationDbContext context)
+    public class CartService : ICartService
     {
-        _pizzaService = pizzaService;
-        _toppingService = toppingService;
-        _promoCodeService = promoCodeService;
-        _httpContextAccessor = httpContextAccessor;
-        _context = context;
-    }
+        private readonly IPizzaService _pizzaService;
+        private readonly IToppingService _toppingService;
+        private readonly IPromoCodeService _promoCodeService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly PizzaDbContext _context;
+        
+        private const string CartSessionKey = "ShoppingCart";
 
-    public async Task<bool> AddToCart(int pizzaId, List<int> toppingIds, int quantity = 1)
-    {
-        try
+        public CartService(
+            IPizzaService pizzaService,
+            IToppingService toppingService,
+            IPromoCodeService promoCodeService,
+            IHttpContextAccessor httpContextAccessor,
+            PizzaDbContext context)
         {
-            // 1. Validate the pizza exists
-            var pizza = await _pizzaService.GetPizzaById(pizzaId);
-            if (pizza == null)
+            _pizzaService = pizzaService;
+            _toppingService = toppingService;
+            _promoCodeService = promoCodeService;
+            _httpContextAccessor = httpContextAccessor;
+            _context = context;
+        }
+
+        public async Task<bool> AddToCart(int pizzaId, List<int> toppingIds, int quantity = 1)
+        {
+            try
+            {
+                var pizza = await _pizzaService.GetPizzaByIdAsync(pizzaId);
+                if (pizza == null)
+                    return false;
+
+                var toppings = await _toppingService.GetToppingsByIdsAsync(toppingIds);
+                
+                decimal itemPrice = pizza.Price;
+                foreach (var topping in toppings)
+                {
+                    itemPrice += topping.Price;
+                }
+
+                var cart = await GetCart();
+
+                var existingItem = cart.Items.FirstOrDefault(i => 
+                    i.PizzaId == pizzaId && 
+                    i.SelectedToppingIds.OrderBy(t => t).SequenceEqual(toppingIds.OrderBy(t => t)));
+
+                if (existingItem != null)
+                {
+                    existingItem.Quantity += quantity;
+                    existingItem.TotalPrice = itemPrice * existingItem.Quantity;
+                }
+                else
+                {
+                    var newItem = new CartItem
+                    {
+                        PizzaId = pizzaId,
+                        PizzaName = pizza.Name,
+                        BasePrice = pizza.Price,
+                        Quantity = quantity,
+                        SelectedToppingIds = toppingIds,
+                        TotalPrice = itemPrice * quantity
+                    };
+                    cart.Items.Add(newItem);
+                }
+
+                cart.Subtotal = cart.Items.Sum(i => i.TotalPrice);
+                cart.Total = cart.Subtotal - cart.Discount;
+
+                await SaveCart(cart);
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> RemoveFromCart(int pizzaId)
+        {
+            var cart = await GetCart();
+            var itemToRemove = cart.Items.FirstOrDefault(i => i.PizzaId == pizzaId);
+            
+            if (itemToRemove == null)
                 return false;
 
-            // 2. Validate and get toppings
-            var toppings = await _toppingService.GetToppingsByIds(toppingIds);
+            cart.Items.Remove(itemToRemove);
             
-            // 3. Calculate the total price for this item
-            decimal itemPrice = pizza.Price;
-            foreach (var topping in toppings)
-            {
-                itemPrice += topping.Price;
-            }
-
-            // 4. Get the current cart
-            var cart = await GetCart();
-
-            // 5. Check if item already exists in cart (same pizza + same toppings)
-            var existingItem = cart.Items.FirstOrDefault(i => 
-                i.PizzaId == pizzaId && 
-                i.SelectedToppingIds.OrderBy(t => t).SequenceEqual(toppingIds.OrderBy(t => t)));
-
-            if (existingItem != null)
-            {
-                // Update quantity of existing item
-                existingItem.Quantity += quantity;
-                existingItem.TotalPrice = itemPrice * existingItem.Quantity;
-            }
-            else
-            {
-                // Add new item to cart
-                var newItem = new CartItem
-                {
-                    PizzaId = pizzaId,
-                    PizzaName = pizza.Name,
-                    BasePrice = pizza.Price,
-                    Quantity = quantity,
-                    SelectedToppingIds = toppingIds,
-                    TotalPrice = itemPrice * quantity
-                };
-                cart.Items.Add(newItem);
-            }
-
-            // 6. Recalculate cart totals
             cart.Subtotal = cart.Items.Sum(i => i.TotalPrice);
             cart.Total = cart.Subtotal - cart.Discount;
-
-            // 7. Save the cart
-            await SaveCart(cart);
-
-            return true;
-        }
-        catch (Exception ex)
-        {
-            // Log the exception
-            // _logger.LogError(ex, "Error adding item to cart");
-            return false;
-        }
-    }
-
-    public async Task<bool> RemoveFromCart(int pizzaId)
-    {
-        var cart = await GetCart();
-        var itemToRemove = cart.Items.FirstOrDefault(i => i.PizzaId == pizzaId);
-        
-        if (itemToRemove == null)
-            return false;
-
-        cart.Items.Remove(itemToRemove);
-        
-        // Recalculate totals
-        cart.Subtotal = cart.Items.Sum(i => i.TotalPrice);
-        cart.Total = cart.Subtotal - cart.Discount;
-        
-        await SaveCart(cart);
-        return true;
-    }
-
-    public async Task<bool> UpdateQuantity(int pizzaId, int newQuantity)
-    {
-        if (newQuantity <= 0)
-            return await RemoveFromCart(pizzaId);
-
-        var cart = await GetCart();
-        var item = cart.Items.FirstOrDefault(i => i.PizzaId == pizzaId);
-        
-        if (item == null)
-            return false;
-
-        item.Quantity = newQuantity;
-        item.TotalPrice = (item.TotalPrice / item.Quantity) * newQuantity;
-        
-        // Recalculate totals
-        cart.Subtotal = cart.Items.Sum(i => i.TotalPrice);
-        cart.Total = cart.Subtotal - cart.Discount;
-        
-        await SaveCart(cart);
-        return true;
-    }
-
-    public async Task<CartModel> GetCart()
-    {
-        var session = _httpContextAccessor.HttpContext.Session;
-        var user = _httpContextAccessor.HttpContext.User;
-
-        // For logged-in users, retrieve from database
-        if (user.Identity.IsAuthenticated)
-        {
-            var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var dbCart = await _context.Carts
-                .Include(c => c.Items)
-                .FirstOrDefaultAsync(c => c.UserId == userId);
-
-            if (dbCart != null)
-            {
-                return MapDbCartToModel(dbCart);
-            }
-        }
-
-        // For anonymous users, use session
-        var cartJson = session.GetString(CartSessionKey);
-        if (string.IsNullOrEmpty(cartJson))
-        {
-            return new CartModel();
-        }
-
-        return JsonSerializer.Deserialize<CartModel>(cartJson);
-    }
-
-    public async Task<decimal> CalculateTotal(string promoCode = null)
-    {
-        var cart = await GetCart();
-        decimal total = cart.Subtotal;
-
-        if (!string.IsNullOrEmpty(promoCode))
-        {
-            var discount = await _promoCodeService.GetDiscount(promoCode, total);
-            total -= discount;
-            cart.Discount = discount;
-        }
-
-        return total;
-    }
-
-    public async Task<bool> ApplyPromoCode(string promoCode)
-    {
-        var cart = await GetCart();
-        var discount = await _promoCodeService.GetDiscount(promoCode, cart.Subtotal);
-        
-        if (discount > 0)
-        {
-            cart.PromoCode = promoCode;
-            cart.Discount = discount;
-            cart.Total = cart.Subtotal - discount;
-            await SaveCart(cart);
-            return true;
-        }
-
-        return false;
-    }
-
-    public async Task ClearCart()
-    {
-        var session = _httpContextAccessor.HttpContext.Session;
-        var user = _httpContextAccessor.HttpContext.User;
-
-        // Clear from database if logged in
-        if (user.Identity.IsAuthenticated)
-        {
-            var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var dbCart = await _context.Carts
-                .Include(c => c.Items)
-                .FirstOrDefaultAsync(c => c.UserId == userId);
-
-            if (dbCart != null)
-            {
-                _context.CartItems.RemoveRange(dbCart.Items);
-                _context.Carts.Remove(dbCart);
-                await _context.SaveChangesAsync();
-            }
-        }
-
-        // Clear from session
-        session.Remove(CartSessionKey);
-    }
-
-    private async Task SaveCart(CartModel cart)
-    {
-        var session = _httpContextAccessor.HttpContext.Session;
-        var user = _httpContextAccessor.HttpContext.User;
-
-        // Save to database if logged in
-        if (user.Identity.IsAuthenticated)
-        {
-            var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var dbCart = await _context.Carts
-                .Include(c => c.Items)
-                .FirstOrDefaultAsync(c => c.UserId == userId);
-
-            if (dbCart == null)
-            {
-                dbCart = new Cart { UserId = userId };
-                _context.Carts.Add(dbCart);
-            }
-
-            // Update cart items
-            _context.CartItems.RemoveRange(dbCart.Items);
-            dbCart.Items = MapModelToDbCartItems(cart, dbCart.Id);
             
-            await _context.SaveChangesAsync();
+            await SaveCart(cart);
+            return true;
         }
 
-        // Also save to session
-        var cartJson = JsonSerializer.Serialize(cart);
-        session.SetString(CartSessionKey, cartJson);
-    }
-
-    private CartModel MapDbCartToModel(Cart dbCart)
-    {
-        // Implementation to map database cart to model
-        return new CartModel
+        public async Task<bool> UpdateQuantity(int pizzaId, int newQuantity)
         {
-            Items = dbCart.Items.Select(i => new CartItem
+            if (newQuantity <= 0)
+                return await RemoveFromCart(pizzaId);
+
+            var cart = await GetCart();
+            var item = cart.Items.FirstOrDefault(i => i.PizzaId == pizzaId);
+            
+            if (item == null)
+                return false;
+
+            decimal pricePerItem = item.TotalPrice / item.Quantity;
+            item.Quantity = newQuantity;
+            item.TotalPrice = pricePerItem * newQuantity;
+            
+            cart.Subtotal = cart.Items.Sum(i => i.TotalPrice);
+            cart.Total = cart.Subtotal - cart.Discount;
+            
+            await SaveCart(cart);
+            return true;
+        }
+
+        public async Task<CartModel> GetCart()
+        {
+            var session = _httpContextAccessor.HttpContext?.Session;
+            if (session == null)
+                return new CartModel();
+
+            var cartJson = session.GetString(CartSessionKey);
+            if (string.IsNullOrEmpty(cartJson))
             {
-                PizzaId = i.PizzaId,
-                PizzaName = i.PizzaName,
-                BasePrice = i.BasePrice,
-                Quantity = i.Quantity,
-                SelectedToppingIds = JsonSerializer.Deserialize<List<int>>(i.ToppingsJson),
-                TotalPrice = i.TotalPrice
-            }).ToList(),
-            Subtotal = dbCart.Subtotal,
-            Discount = dbCart.Discount,
-            Total = dbCart.Total,
-            PromoCode = dbCart.PromoCode
-        };
-    }
+                return new CartModel();
+            }
 
-    private List<CartItem> MapModelToDbCartItems(CartModel cart, int cartId)
-    {
-        // Implementation to map model to database cart items
-        return cart.Items.Select(i => new CartItemEntity
+            return JsonSerializer.Deserialize<CartModel>(cartJson) ?? new CartModel();
+        }
+
+        public async Task<decimal> CalculateTotal(string? promoCode = null)
         {
-            CartId = cartId,
-            PizzaId = i.PizzaId,
-            PizzaName = i.PizzaName,
-            BasePrice = i.BasePrice,
-            Quantity = i.Quantity,
-            ToppingsJson = JsonSerializer.Serialize(i.SelectedToppingIds),
-            TotalPrice = i.TotalPrice
-        }).ToList();
+            var cart = await GetCart();
+            decimal total = cart.Subtotal;
+
+            if (!string.IsNullOrEmpty(promoCode))
+            {
+                var discount = await _promoCodeService.ValidateAndCalculateDiscountAsync(promoCode, total);
+                total -= discount;
+                cart.Discount = discount;
+            }
+
+            return total;
+        }
+
+        public async Task<bool> ApplyPromoCode(string promoCode)
+        {
+            var cart = await GetCart();
+            var discount = await _promoCodeService.ValidateAndCalculateDiscountAsync(promoCode, cart.Subtotal);
+            
+            if (discount > 0)
+            {
+                cart.PromoCode = promoCode;
+                cart.Discount = discount;
+                cart.Total = cart.Subtotal - discount;
+                await SaveCart(cart);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task ClearCart()
+        {
+            var session = _httpContextAccessor.HttpContext?.Session;
+            if (session != null)
+            {
+                session.Remove(CartSessionKey);
+            }
+            await Task.CompletedTask;
+        }
+
+        private async Task SaveCart(CartModel cart)
+        {
+            var session = _httpContextAccessor.HttpContext?.Session;
+            if (session != null)
+            {
+                var cartJson = JsonSerializer.Serialize(cart);
+                session.SetString(CartSessionKey, cartJson);
+            }
+            await Task.CompletedTask;
+        }
     }
 }
