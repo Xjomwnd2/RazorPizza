@@ -137,7 +137,25 @@ body {
     background: var(--primary-color);
     color: white;
 }
+/* ADD
+/* Active navigation link styling */
+.navbar-nav .nav-link.active {
+    font-weight: bold;
+    color: #0d6efd !important;
+    border-bottom: 2px solid #0d6efd;
+}
 
+/* Cart icon badge for item count */
+.cart-badge {
+    position: relative;
+}
+
+.cart-badge .badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    font-size: 0.7rem;
+}
 /* === MAIN CONTENT === */
 main {
     flex: 1;
