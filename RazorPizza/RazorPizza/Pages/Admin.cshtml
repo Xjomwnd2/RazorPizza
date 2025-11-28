@@ -36,7 +36,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Manage Pizzas</h5>
-                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addPizzaModal">
+                    <button class="btn btn-primary btn-sm">
                         <i class="bi bi-plus-circle"></i> Add Pizza
                     </button>
                 </div>
@@ -56,7 +56,7 @@
                                 @foreach (var pizza in Model.Pizzas)
                                 {
                                     <tr>
-                                        <td>@pizza.Id</td>
+                                        <td>@pizza.PizzaId</td>
                                         <td>@pizza.Name</td>
                                         <td>@pizza.Description</td>
                                         <td>$@pizza.Price.ToString("F2")</td>
@@ -67,7 +67,7 @@
                                             <form method="post" class="d-inline">
                                                 <button type="submit" class="btn btn-sm btn-danger" 
                                                         asp-page-handler="DeletePizza" 
-                                                        asp-route-id="@pizza.Id"
+                                                        asp-route-id="@pizza.PizzaId"
                                                         onclick="return confirm('Are you sure?')">
                                                     <i class="bi bi-trash"></i> Delete
                                                 </button>
@@ -94,7 +94,7 @@
                             <thead>
                                 <tr>
                                     <th>Order ID</th>
-                                    <th>Customer</th>
+                                    <th>Customer Email</th>
                                     <th>Date</th>
                                     <th>Total</th>
                                     <th>Status</th>
@@ -105,8 +105,8 @@
                                 @foreach (var order in Model.Orders)
                                 {
                                     <tr>
-                                        <td>#@order.Id</td>
-                                        <td>@order.CustomerName</td>
+                                        <td>#@order.OrderId</td>
+                                        <td>@(order.CustomerEmail ?? "N/A")</td>
                                         <td>@order.OrderDate.ToString("MMM dd, yyyy")</td>
                                         <td>$@order.TotalAmount.ToString("F2")</td>
                                         <td>
@@ -150,7 +150,7 @@
                                 @foreach (var topping in Model.Toppings)
                                 {
                                     <tr>
-                                        <td>@topping.Id</td>
+                                        <td>@topping.ToppingId</td>
                                         <td>@topping.Name</td>
                                         <td>$@topping.Price.ToString("F2")</td>
                                         <td>
