@@ -110,8 +110,6 @@ namespace RazorPizza.Services
             {
                 decimal pricePerItem = item.TotalPrice / item.Quantity;
                 item.Quantity = newQuantity;
-                item.TotalPrice = pricePerItem * newQuantity;
-                
                 SaveCart(cartItems);
             }
         }
