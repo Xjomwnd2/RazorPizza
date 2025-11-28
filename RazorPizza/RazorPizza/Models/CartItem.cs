@@ -5,19 +5,19 @@ namespace RazorPizza.Models
 {
     public class CartItem
     {
-        public string Size { get; set; }
-        public string CrustType { get; set; }
+        public string Size { get; set; } = string.Empty;
+        public string CrustType { get; set; } = string.Empty;
         public string? SpecialInstructions { get; set; }
 
         public int CartItemId { get; set; }
         public int PizzaId { get; set; }
-        public string PizzaName { get; set; }
+        public string PizzaName { get; set; } = string.Empty;
 
         public decimal Price { get; set; }
         public int Quantity { get; set; } = 1;
 
         // Sauce selection
-        public string Sauce { get; set; }
+        public string Sauce { get; set; } = string.Empty;
 
         // Topping IDs used in the UI
         public List<int> ToppingIds { get; set; } = new();
