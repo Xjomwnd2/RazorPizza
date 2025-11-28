@@ -70,8 +70,6 @@ namespace RazorPizza.Services
                 // Update quantity of existing item
                 existingItem.Quantity += item.Quantity;
                 decimal pricePerItem = existingItem.TotalPrice / (existingItem.Quantity - item.Quantity);
-                existingItem.TotalPrice = pricePerItem * existingItem.Quantity;
-            }
             else
             {
                 // Add new item
