@@ -14,6 +14,9 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddDbContext<PizzaDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Add HttpContextAccessor (needed to access session in services)
+builder.Services.AddHttpContextAccessor();
+
 // Register application services
 builder.Services.AddScoped<IPizzaService, PizzaService>();
 builder.Services.AddScoped<IToppingService, ToppingService>();
@@ -58,7 +61,15 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+
+// Enable session middleware (must be after UseRouting and before UseAuthorization/MapRazorPages)
 app.UseSession();
+
+// Authorization middleware (if you add authentication later)
+// app.UseAuthentication();
+// app.UseAuthorization();
+
+app.MapRazorPages();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
