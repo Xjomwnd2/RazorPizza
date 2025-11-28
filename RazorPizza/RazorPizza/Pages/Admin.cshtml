@@ -94,10 +94,11 @@
                             <thead>
                                 <tr>
                                     <th>Order ID</th>
-                                    <th>Customer Email</th>
+                                    <th>User ID</th>
                                     <th>Date</th>
                                     <th>Total</th>
                                     <th>Status</th>
+                                    <th>Delivery Address</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -106,16 +107,53 @@
                                 {
                                     <tr>
                                         <td>#@order.OrderId</td>
-                                        <td>@(order.CustomerEmail ?? "N/A")</td>
-                                        <td>@order.OrderDate.ToString("MMM dd, yyyy")</td>
+                                        <td>@(string.IsNullOrEmpty(order.UserId) ? "Guest" : order.UserId.Substring(0, Math.Min(8, order.UserId.Length)) + "...")</td>
+                                        <td>@order.OrderDate.ToString("MMM dd, yyyy HH:mm")</td>
                                         <td>$@order.TotalAmount.ToString("F2")</td>
                                         <td>
-                                            <span class="badge bg-info">@order.Status</span>
+                                            @if (order.Status == "Pending")
+                                            {
+                                                <span class="badge bg-warning text-dark">@order.Status</span>
+                                            }
+                                            else if (order.Status == "Preparing" || order.Status == "Baking")
+                                            {
+                                                <span class="badge bg-info">@order.Status</span>
+                                            }
+                                            else if (order.Status == "Delivering")
+                                            {
+                                                <span class="badge bg-primary">@order.Status</span>
+                                            }
+                                            else if (order.Status == "Completed")
+                                            {
+                                                <span class="badge bg-success">@order.Status</span>
+                                            }
+                                            else if (order.Status == "Cancelled")
+                                            {
+                                                <span class="badge bg-danger">@order.Status</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">@order.Status</span>
+                                            }
                                         </td>
+                                        <td>@(string.IsNullOrEmpty(order.DeliveryAddress) ? "N/A" : order.DeliveryAddress.Substring(0, Math.Min(30, order.DeliveryAddress.Length)) + "...")</td>
                                         <td>
-                                            <button class="btn btn-sm btn-info">
-                                                <i class="bi bi-eye"></i> View
+                                            <button class="btn btn-sm btn-info" title="View Details">
+                                                <i class="bi bi-eye"></i>
                                             </button>
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                                    Update Status
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#">Preparing</a></li>
+                                                    <li><a class="dropdown-item" href="#">Baking</a></li>
+                                                    <li><a class="dropdown-item" href="#">Delivering</a></li>
+                                                    <li><a class="dropdown-item" href="#">Completed</a></li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li><a class="dropdown-item text-danger" href="#">Cancel</a></li>
+                                                </ul>
+                                            </div>
                                         </td>
                                     </tr>
                                 }
@@ -134,40 +172,3 @@
                     <button class="btn btn-primary btn-sm">
                         <i class="bi bi-plus-circle"></i> Add Topping
                     </button>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Price</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var topping in Model.Toppings)
-                                {
-                                    <tr>
-                                        <td>@topping.ToppingId</td>
-                                        <td>@topping.Name</td>
-                                        <td>$@topping.Price.ToString("F2")</td>
-                                        <td>
-                                            <button class="btn btn-sm btn-warning">
-                                                <i class="bi bi-pencil"></i> Edit
-                                            </button>
-                                            <button class="btn btn-sm btn-danger">
-                                                <i class="bi bi-trash"></i> Delete
-                                            </button>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
