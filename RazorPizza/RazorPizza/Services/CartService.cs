@@ -29,165 +29,126 @@ namespace RazorPizza.Services
             _context = context;
         }
 
-        public async Task<bool> AddToCart(int pizzaId, List<int> toppingIds, int quantity = 1)
-        {
-            try
-            {
-                var pizza = await _pizzaService.GetPizzaByIdAsync(pizzaId);
-                if (pizza == null)
-                    return false;
-
-                var toppings = await _toppingService.GetToppingsByIdsAsync(toppingIds);
-                
-                decimal itemPrice = pizza.Price;
-                foreach (var topping in toppings)
-                {
-                    itemPrice += topping.Price;
-                }
-
-                var cart = await GetCart();
-
-                var existingItem = cart.Items.FirstOrDefault(i => 
-                    i.PizzaId == pizzaId && 
-                    i.SelectedToppingIds.OrderBy(t => t).SequenceEqual(toppingIds.OrderBy(t => t)));
-
-                if (existingItem != null)
-                {
-                    existingItem.Quantity += quantity;
-                    existingItem.TotalPrice = itemPrice * existingItem.Quantity;
-                }
-                else
-                {
-                    var newItem = new CartItem
-                    {
-                        PizzaId = pizzaId,
-                        PizzaName = pizza.Name,
-                        BasePrice = pizza.Price,
-                        Quantity = quantity,
-                        SelectedToppingIds = toppingIds,
-                        TotalPrice = itemPrice * quantity
-                    };
-                    cart.Items.Add(newItem);
-                }
-
-                cart.Subtotal = cart.Items.Sum(i => i.TotalPrice);
-                cart.Total = cart.Subtotal - cart.Discount;
-
-                await SaveCart(cart);
-
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
-        public async Task<bool> RemoveFromCart(int pizzaId)
-        {
-            var cart = await GetCart();
-            var itemToRemove = cart.Items.FirstOrDefault(i => i.PizzaId == pizzaId);
-            
-            if (itemToRemove == null)
-                return false;
-
-            cart.Items.Remove(itemToRemove);
-            
-            cart.Subtotal = cart.Items.Sum(i => i.TotalPrice);
-            cart.Total = cart.Subtotal - cart.Discount;
-            
-            await SaveCart(cart);
-            return true;
-        }
-
-        public async Task<bool> UpdateQuantity(int pizzaId, int newQuantity)
-        {
-            if (newQuantity <= 0)
-                return await RemoveFromCart(pizzaId);
-
-            var cart = await GetCart();
-            var item = cart.Items.FirstOrDefault(i => i.PizzaId == pizzaId);
-            
-            if (item == null)
-                return false;
-
-            decimal pricePerItem = item.TotalPrice / item.Quantity;
-            item.Quantity = newQuantity;
-            item.TotalPrice = pricePerItem * newQuantity;
-            
-            cart.Subtotal = cart.Items.Sum(i => i.TotalPrice);
-            cart.Total = cart.Subtotal - cart.Discount;
-            
-            await SaveCart(cart);
-            return true;
-        }
-
-        public async Task<CartModel> GetCart()
+        // Get the cart as a List<CartItem>
+        public List<CartItem> GetCart()
         {
             var session = _httpContextAccessor.HttpContext?.Session;
             if (session == null)
-                return new CartModel();
+                return new List<CartItem>();
 
             var cartJson = session.GetString(CartSessionKey);
             if (string.IsNullOrEmpty(cartJson))
             {
-                return new CartModel();
+                return new List<CartItem>();
             }
 
-            return JsonSerializer.Deserialize<CartModel>(cartJson) ?? new CartModel();
+            var cartModel = JsonSerializer.Deserialize<CartModel>(cartJson);
+            return cartModel?.Items ?? new List<CartItem>();
         }
 
-        public async Task<decimal> CalculateTotal(string? promoCode = null)
+        // Get cart items (same as GetCart for now)
+        public List<CartItem> GetCartItems()
         {
-            var cart = await GetCart();
-            decimal total = cart.Subtotal;
+            return GetCart();
+        }
 
-            if (!string.IsNullOrEmpty(promoCode))
+        // Add item to cart
+        public void AddToCart(CartItem item)
+        {
+            if (item == null)
+                return;
+
+            var cartItems = GetCart();
+
+            // Check if item already exists (same pizza + same toppings)
+            var existingItem = cartItems.FirstOrDefault(i => 
+                i.PizzaId == item.PizzaId && 
+                i.SelectedToppingIds.OrderBy(t => t).SequenceEqual(item.SelectedToppingIds.OrderBy(t => t)));
+
+            if (existingItem != null)
             {
-                var discount = await _promoCodeService.ValidateAndCalculateDiscountAsync(promoCode, total);
-                total -= discount;
-                cart.Discount = discount;
+                // Update quantity of existing item
+                existingItem.Quantity += item.Quantity;
+                decimal pricePerItem = existingItem.TotalPrice / (existingItem.Quantity - item.Quantity);
+                existingItem.TotalPrice = pricePerItem * existingItem.Quantity;
+            }
+            else
+            {
+                // Add new item
+                cartItems.Add(item);
             }
 
-            return total;
+            SaveCart(cartItems);
         }
 
-        public async Task<bool> ApplyPromoCode(string promoCode)
+        // Remove item from cart
+        public void RemoveFromCart(int pizzaId)
         {
-            var cart = await GetCart();
-            var discount = await _promoCodeService.ValidateAndCalculateDiscountAsync(promoCode, cart.Subtotal);
+            var cartItems = GetCart();
+            var itemToRemove = cartItems.FirstOrDefault(i => i.PizzaId == pizzaId);
             
-            if (discount > 0)
+            if (itemToRemove != null)
             {
-                cart.PromoCode = promoCode;
-                cart.Discount = discount;
-                cart.Total = cart.Subtotal - discount;
-                await SaveCart(cart);
-                return true;
+                cartItems.Remove(itemToRemove);
+                SaveCart(cartItems);
             }
-
-            return false;
         }
 
-        public async Task ClearCart()
+        // Update quantity of an item
+        public void UpdateQuantity(int pizzaId, int newQuantity)
+        {
+            if (newQuantity <= 0)
+            {
+                RemoveFromCart(pizzaId);
+                return;
+            }
+
+            var cartItems = GetCart();
+            var item = cartItems.FirstOrDefault(i => i.PizzaId == pizzaId);
+            
+            if (item != null)
+            {
+                decimal pricePerItem = item.TotalPrice / item.Quantity;
+                item.Quantity = newQuantity;
+                item.TotalPrice = pricePerItem * newQuantity;
+                
+                SaveCart(cartItems);
+            }
+        }
+
+        // Clear all items from cart
+        public void ClearCart()
         {
             var session = _httpContextAccessor.HttpContext?.Session;
             if (session != null)
             {
                 session.Remove(CartSessionKey);
             }
-            await Task.CompletedTask;
         }
 
-        private async Task SaveCart(CartModel cart)
+        // Get total price of all items in cart
+        public decimal GetCartTotal()
+        {
+            var cartItems = GetCart();
+            return cartItems.Sum(i => i.TotalPrice);
+        }
+
+        // Helper method to save cart to session
+        private void SaveCart(List<CartItem> items)
         {
             var session = _httpContextAccessor.HttpContext?.Session;
             if (session != null)
             {
-                var cartJson = JsonSerializer.Serialize(cart);
+                var cartModel = new CartModel
+                {
+                    Items = items,
+                    Subtotal = items.Sum(i => i.TotalPrice),
+                    Total = items.Sum(i => i.TotalPrice)
+                };
+                
+                var cartJson = JsonSerializer.Serialize(cartModel);
                 session.SetString(CartSessionKey, cartJson);
             }
-            await Task.CompletedTask;
         }
     }
 }
