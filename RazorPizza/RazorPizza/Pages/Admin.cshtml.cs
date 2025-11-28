@@ -36,6 +36,12 @@ namespace RazorPizza.Pages
             return RedirectToPage();
         }
 
+        public async Task<IActionResult> OnPostDeleteToppingAsync(int id)
+        {
+            await _toppingService.DeleteToppingAsync(id);
+            return RedirectToPage();
+        }
+
         private async Task LoadData()
         {
             Pizzas = await _pizzaService.GetAllPizzasAsync();
