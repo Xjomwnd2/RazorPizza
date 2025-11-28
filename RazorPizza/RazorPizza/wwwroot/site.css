@@ -1,0 +1,446 @@
+/* ========================================
+   GLOBAL STYLES
+   ======================================== */
+:root {
+    --primary-color: #ff6b35;
+    --secondary-color: #f7931e;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+    --dark-color: #343a40;
+    --light-color: #f8f9fa;
+    --pizza-red: #e74c3c;
+    --pizza-orange: #ff6b35;
+    --cheese-yellow: #f39c12;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    background-attachment: fixed;
+}
+
+.container {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+/* ========================================
+   NAVBAR STYLING
+   ======================================== */
+.navbar {
+    background: linear-gradient(135deg, var(--pizza-red) 0%, var(--pizza-orange) 100%) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-brand {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: white !important;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.navbar-brand i {
+    color: var(--cheese-yellow);
+    animation: rotate 3s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.nav-link {
+    color: white !important;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border-radius: 5px;
+    margin: 0 5px;
+}
+
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.nav-link i {
+    margin-right: 5px;
+}
+
+/* ========================================
+   CART PAGE STYLING
+   ======================================== */
+.cart-page h2 {
+    color: var(--pizza-red);
+    font-weight: bold;
+    margin-bottom: 30px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    background: linear-gradient(135deg, var(--pizza-orange) 0%, var(--pizza-red) 100%);
+    color: white;
+    border-radius: 15px 15px 0 0 !important;
+    font-weight: bold;
+    padding: 15px 20px;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* Cart Item Styling */
+.cart-item {
+    border-bottom: 2px solid #f0f0f0;
+    padding: 15px 0;
+    transition: background 0.3s ease;
+}
+
+.cart-item:hover {
+    background: rgba(255, 107, 53, 0.05);
+    border-radius: 10px;
+}
+
+.cart-item h5 {
+    color: var(--pizza-red);
+    font-weight: bold;
+}
+
+.cart-item .text-muted {
+    color: #666 !important;
+}
+
+/* Input Groups */
+.input-group {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.input-group .btn {
+    border: none;
+    background: var(--pizza-orange);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.input-group .btn:hover {
+    background: var(--pizza-red);
+    transform: scale(1.05);
+}
+
+.input-group .form-control {
+    border: 1px solid #ddd;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* Buttons */
+.btn-primary {
+    background: linear-gradient(135deg, var(--pizza-orange) 0%, var(--pizza-red) 100%);
+    border: none;
+    padding: 12px 30px;
+    font-weight: bold;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    border: none;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+}
+
+.btn-outline-secondary {
+    border: 2px solid var(--pizza-orange);
+    color: var(--pizza-orange);
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+    background: var(--pizza-orange);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Order Summary Card */
+.order-summary {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 20px;
+}
+
+.order-summary h5 {
+    color: white;
+    font-weight: bold;
+}
+
+.order-summary hr {
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Alert Styling */
+.alert {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    color: white;
+}
+
+/* ========================================
+   ADMIN PAGE STYLING
+   ======================================== */
+.admin-page h2 {
+    color: var(--pizza-red);
+    font-weight: bold;
+    margin-bottom: 30px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Tabs Styling */
+.nav-tabs {
+    border-bottom: 3px solid var(--pizza-orange);
+    margin-bottom: 30px;
+}
+
+.nav-tabs .nav-link {
+    color: var(--dark-color);
+    border: none;
+    border-radius: 10px 10px 0 0;
+    padding: 12px 25px;
+    margin-right: 5px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link:hover {
+    background: rgba(255, 107, 53, 0.1);
+    color: var(--pizza-red);
+}
+
+.nav-tabs .nav-link.active {
+    background: linear-gradient(135deg, var(--pizza-orange) 0%, var(--pizza-red) 100%);
+    color: white !important;
+    border: none;
+}
+
+.nav-tabs .nav-link i {
+    margin-right: 8px;
+}
+
+/* Table Styling */
+.table {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.table thead {
+    background: linear-gradient(135deg, var(--pizza-orange) 0%, var(--pizza-red) 100%);
+    color: white;
+}
+
+.table thead th {
+    border: none;
+    padding: 15px;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+}
+
+.table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.table tbody tr:hover {
+    background: rgba(255, 107, 53, 0.05);
+    transform: scale(1.01);
+}
+
+.table tbody td {
+    padding: 15px;
+    vertical-align: middle;
+}
+
+/* Badge Styling */
+.badge {
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.badge.bg-success {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;
+}
+
+.badge.bg-danger {
+    background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%) !important;
+}
+
+.badge.bg-warning {
+    background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%) !important;
+}
+
+.badge.bg-info {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.badge.bg-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.badge.bg-secondary {
+    background: linear-gradient(135deg, #868f96 0%, #596164 100%) !important;
+}
+
+/* Button Styling for Admin */
+.btn-sm {
+    border-radius: 15px;
+    padding: 6px 15px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%);
+    border: none;
+    color: white;
+}
+
+.btn-warning:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(242, 153, 74, 0.4);
+}
+
+.btn-info {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+}
+
+.btn-info:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+/* Dropdown Styling */
+.dropdown-menu {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+}
+
+.dropdown-item {
+    padding: 10px 20px;
+    transition: all 0.3s ease;
+}
+
+.dropdown-item:hover {
+    background: rgba(255, 107, 53, 0.1);
+    color: var(--pizza-red);
+    padding-left: 25px;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    
+    .card-body {
+        padding: 15px;
+    }
+    
+    .btn {
+        font-size: 0.9rem;
+        padding: 8px 20px;
+    }
+    
+    .table {
+        font-size: 0.85rem;
+    }
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeIn 0.5s ease;
+}
+
+/* Loading Spinner */
+.spinner-border {
+    border-color: var(--pizza-orange);
+    border-right-color: transparent;
+}
+
+/* Footer */
+.footer {
+    background: linear-gradient(135deg, var(--pizza-red) 0%, var(--pizza-orange) 100%);
+    color: white;
+    padding: 20px 0;
+    margin-top: 50px;
+}
+
+.footer a {
+    color: var(--cheese-yellow);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.footer a:hover {
+    color: white;
+    text-decoration: underline;
+}
