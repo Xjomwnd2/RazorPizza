@@ -8,7 +8,6 @@ namespace RazorPizza.Models
         public string Size { get; set; }
         public string CrustType { get; set; }
         public string? SpecialInstructions { get; set; }
-
         public int CartItemId { get; set; }
         public int PizzaId { get; set; }
         public string PizzaName { get; set; }
@@ -25,6 +24,9 @@ namespace RazorPizza.Models
         // Toppings used by services
         public List<int> SelectedToppingIds { get; set; } = new();
         public List<Topping> SelectedToppings { get; set; } = new();
+
+        // Extra notes from customer
+        public string SpecialInstructions { get; set; }
 
         // Auto-calculated total
         public decimal TotalPrice
