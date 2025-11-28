@@ -1,3 +1,4 @@
+namespace RazorPizza.Models;
 public class CartItem
 {
     public int PizzaId { get; set; }
