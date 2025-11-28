@@ -1,27 +1,31 @@
 using System.Collections.Generic;
-using RazorPizza.Models;
+using System.Linq;
 
 namespace RazorPizza.Models
 {
     public class CartItem
     {
-        public int CartItemId { get; set; }   // Used in ShoppingCart.razor
+        public int CartItemId { get; set; }
         public int PizzaId { get; set; }
         public string PizzaName { get; set; }
 
-        // Base price of the pizza
         public decimal Price { get; set; }
-
-        // Quantity in the cart
         public int Quantity { get; set; } = 1;
 
-        // List of topping IDs selected for this cart item
-        public List<int> SelectedToppingIds { get; set; } = new();
+        // Sauce selection
+        public string Sauce { get; set; }
 
-        // Optional list of actual topping objects
+        // Topping IDs used in the UI
+        public List<int> ToppingIds { get; set; } = new();
+
+        // Toppings used by services
+        public List<int> SelectedToppingIds { get; set; } = new();
         public List<Topping> SelectedToppings { get; set; } = new();
 
-        // Computed total (pizza + toppings) × quantity
+        // Extra notes from customer
+        public string SpecialInstructions { get; set; }
+
+        // Auto-calculated total
         public decimal TotalPrice
         {
             get
