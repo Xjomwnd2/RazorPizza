@@ -1,16 +1,13 @@
-namespace RazorPizza.Models;
-
 public class CartItem
 {
-    public int CartItemId { get; set; }
-    public int? PizzaId { get; set; }
-    public string PizzaName { get; set; } = string.Empty;
-    public string Size { get; set; } = "Medium";
-    public string CrustType { get; set; } = "Regular";
-    public string Sauce { get; set; } = "Tomato";
-    public List<int> ToppingIds { get; set; } = new();
-    public int Quantity { get; set; } = 1;
-    public decimal Price { get; set; }
-    public decimal TotalPrice => Price * Quantity;
-    public string? SpecialInstructions { get; set; }
+    public int PizzaId { get; set; }
+    public string PizzaName { get; set; }
+    public decimal BasePrice { get; set; }
+
+    // ADD THIS
+    public List<int> SelectedToppingIds { get; set; } = new List<int>();
+
+    public decimal TotalPrice => BasePrice + (SelectedToppings?.Sum(t => t.Price) ?? 0);
+
+    public List<Topping> SelectedToppings { get; set; } = new();
 }
