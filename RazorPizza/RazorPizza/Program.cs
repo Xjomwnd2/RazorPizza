@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using RazorPizza.Data;
 using RazorPizza.Services;
 using RazorPizza.Models;
@@ -21,14 +22,14 @@ builder.Services.AddScoped<IPizzaService, PizzaService>();
 builder.Services.AddScoped<IToppingService, ToppingService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IPromoCodeService, PromoCodeService>();
-builder.Services.AddScoped<ICartService, CartService>(); // Cart service for shopping cart
+builder.Services.AddScoped<ICartService, CartService>();
 
 // Add session support
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30); // Session timeout
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true; // Required for GDPR compliance
+    options.Cookie.IsEssential = true;
 });
 
 var app = builder.Build();
@@ -40,13 +41,13 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<PizzaDbContext>();
-        context.Database.EnsureCreated(); // Ensure DB is created
-        DbInitializer.Initialize(context); // Seed initial data
+        context.Database.EnsureCreated();
+        DbInitializer.Initialize(context);
     }
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred seeding the database.");
+        logger.LogError(ex, "An error occurred seeding the DB.");
     }
 }
 
@@ -61,14 +62,13 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-// Enable session middleware (must be after UseRouting)
+// Enable session middleware (must be after UseRouting and before UseAuthorization/MapRazorPages)
 app.UseSession();
 
-// Authorization middleware (optional, for future auth)
-app.UseAuthentication();
-app.UseAuthorization();
+// Authorization middleware (if you add authentication later)
+// app.UseAuthentication();
+// app.UseAuthorization();
 
-// Map endpoints
 app.MapRazorPages();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
