@@ -5,6 +5,9 @@ namespace RazorPizza.Models
 {
     public class CartItem
     {
+        public string Size { get; set; }
+        public string CrustType { get; set; }
+        public string? SpecialInstructions { get; set; }
         public int CartItemId { get; set; }
         public int PizzaId { get; set; }
         public string PizzaName { get; set; }
