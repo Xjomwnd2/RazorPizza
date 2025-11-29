@@ -1,332 +1,597 @@
-@page "/admin"
-@using RazorPizza.Models
-@using RazorPizza.Services
+@page "/admindashboard"
 @using Microsoft.AspNetCore.Authorization
 @attribute [Authorize(Roles = "Admin")]
-@inject IOrderService OrderService
-@inject IPizzaService PizzaService
 
-<PageTitle>Admin Dashboard - Razor Pizza</PageTitle>
+<PageTitle>Admin Dashboard</PageTitle>
 
-<NavLink class="nav-link" href="/admin">
-    <i class="bi bi-speedometer2"></i> Admin
-</NavLink>
+<style>
+    :root {
+        --primary-color: #d32f2f;
+        --secondary-color: #f57c00;
+        --success-color: #388e3c;
+        --danger-color: #c62828;
+        --light-bg: #f5f5f5;
+        --card-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
 
-<div class="container-fluid my-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <h1 class="display-5 fw-bold">
-                <i class="bi bi-speedometer2"></i> Admin Dashboard
-            </h1>
-            <p class="text-muted">Manage your pizza restaurant</p>
-        </div>
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .dashboard-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 30px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        box-shadow: var(--card-shadow);
+    }
+
+    .dashboard-header h1 {
+        margin: 0 0 15px 0;
+        font-size: 2.5rem;
+    }
+
+    .nav-tabs {
+        display: flex;
+        gap: 10px;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .nav-tabs button {
+        padding: 12px 24px;
+        border: none;
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+
+    .nav-tabs button:hover {
+        background: rgba(255,255,255,0.3);
+        transform: translateY(-2px);
+    }
+
+    .nav-tabs button.active {
+        background: white;
+        color: var(--primary-color);
+    }
+
+    .section {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: var(--card-shadow);
+        margin-bottom: 30px;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .section-header h2 {
+        margin: 0;
+        color: #333;
+        font-size: 1.8rem;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+
+    .btn-primary {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #b71c1c;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
+    }
+
+    .btn-success {
+        background: var(--success-color);
+        color: white;
+    }
+
+    .btn-danger {
+        background: var(--danger-color);
+        color: white;
+        padding: 8px 16px;
+        font-size: 0.85rem;
+    }
+
+    .btn-secondary {
+        background: #757575;
+        color: white;
+        padding: 8px 16px;
+        font-size: 0.85rem;
+        margin-right: 8px;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .data-table thead {
+        background: var(--light-bg);
+    }
+
+    .data-table th {
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+        color: #555;
+        border-bottom: 2px solid #ddd;
+    }
+
+    .data-table td {
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .data-table tbody tr:hover {
+        background: #fafafa;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+    }
+
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        max-width: 600px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .modal-header h3 {
+        margin: 0;
+        color: #333;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #999;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #555;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 0.95rem;
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .status-pending {
+        background: #fff3e0;
+        color: #e65100;
+    }
+
+    .status-completed {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .status-cancelled {
+        background: #ffebee;
+        color: #c62828;
+    }
+
+    .hidden {
+        display: none;
+    }
+</style>
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>🍕 Admin Dashboard</h1>
+        <ul class="nav-tabs">
+            <li><button class="@(activeTab == "pizzas" ? "active" : "")" @onclick='() => SetActiveTab("pizzas")'>Pizzas</button></li>
+            <li><button class="@(activeTab == "orders" ? "active" : "")" @onclick='() => SetActiveTab("orders")'>Orders</button></li>
+            <li><button class="@(activeTab == "toppings" ? "active" : "")" @onclick='() => SetActiveTab("toppings")'>Toppings</button></li>
+        </ul>
     </div>
 
-    @if (loading)
+    @if (activeTab == "pizzas")
     {
-        <div class="text-center py-5">
-            <div class="spinner-border text-primary"></div>
-            <p class="mt-3">Loading dashboard...</p>
+        <div class="section">
+            <div class="section-header">
+                <h2>Manage Pizzas</h2>
+                <button class="btn btn-primary" @onclick="OpenAddPizzaModal">+ Add Pizza</button>
+            </div>
+            
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Price</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var pizza in pizzas)
+                    {
+                        <tr>
+                            <td>@pizza.Id</td>
+                            <td><strong>@pizza.Name</strong></td>
+                            <td>@pizza.Description</td>
+                            <td>$@pizza.Price.ToString("F2")</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-secondary" @onclick="() => OpenEditPizzaModal(pizza)">Edit</button>
+                                    <button class="btn btn-danger" @onclick="() => DeletePizza(pizza.Id)">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     }
-    else
+
+    @if (activeTab == "orders")
     {
-        <!-- Statistics Cards -->
-        <div class="row g-4 mb-4">
-            <!-- Total Orders -->
-            <div class="col-md-3">
-                <div class="card bg-primary text-white shadow-sm h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="card-title mb-0">Total Orders</h6>
-                                <h2 class="mt-2 mb-0">@totalOrders</h2>
-                                <small>All time</small>
-                            </div>
-                            <i class="bi bi-receipt display-4 opacity-50"></i>
-                        </div>
-                    </div>
-                </div>
+        <div class="section">
+            <div class="section-header">
+                <h2>Recent Orders</h2>
             </div>
-
-            <!-- Pending Orders -->
-            <div class="col-md-3">
-                <div class="card bg-warning text-dark shadow-sm h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="card-title mb-0">Pending Orders</h6>
-                                <h2 class="mt-2 mb-0">@pendingOrders</h2>
-                                <small>Needs attention</small>
-                            </div>
-                            <i class="bi bi-hourglass-split display-4 opacity-50"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Today's Revenue -->
-            <div class="col-md-3">
-                <div class="card bg-success text-white shadow-sm h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="card-title mb-0">Today's Revenue</h6>
-                                <h2 class="mt-2 mb-0">$@todayRevenue.ToString("F2")</h2>
-                                <small>@todayOrders orders</small>
-                            </div>
-                            <i class="bi bi-currency-dollar display-4 opacity-50"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Total Pizzas -->
-            <div class="col-md-3">
-                <div class="card bg-info text-white shadow-sm h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="card-title mb-0">Menu Items</h6>
-                                <h2 class="mt-2 mb-0">@totalPizzas</h2>
-                                <small>Active pizzas</small>
-                            </div>
-                            <i class="bi bi-pizza display-4 opacity-50"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>User ID</th>
+                        <th>Date</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Delivery Address</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in orders)
+                    {
+                        <tr>
+                            <td>#@order.Id</td>
+                            <td>@order.UserId</td>
+                            <td>@order.OrderDate.ToString("MMM dd, yyyy")</td>
+                            <td>$@order.Total.ToString("F2")</td>
+                            <td>
+                                <span class="status-badge status-@order.Status.ToLower()">@order.Status</span>
+                            </td>
+                            <td>@order.DeliveryAddress</td>
+                            <td>
+                                <select @onchange="(e) => UpdateOrderStatus(order.Id, e.Value.ToString())">
+                                    <option value="Pending" selected="@(order.Status == "Pending")">Pending</option>
+                                    <option value="Completed" selected="@(order.Status == "Completed")">Completed</option>
+                                    <option value="Cancelled" selected="@(order.Status == "Cancelled")">Cancelled</option>
+                                </select>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
+    }
 
-        <!-- Quick Actions -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0">Quick Actions</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-3">
-                                <button class="btn btn-primary w-100" @onclick='() => NavigateTo("/admin/orders")'>
-                                    <i class="bi bi-list-check"></i> Manage Orders
-                                </button>
-                            </div>
-                            <div class="col-md-3">
-                                <button class="btn btn-success w-100" @onclick='() => NavigateTo("/admin/pizzas")'>
-                                    <i class="bi bi-plus-circle"></i> Add New Pizza
-                                </button>
-                            </div>
-                            <div class="col-md-3">
-                                <button class="btn btn-info w-100" @onclick='() => NavigateTo("/admin/toppings")'>
-                                    <i class="bi bi-gear"></i> Manage Toppings
-                                </button>
-                            </div>
-                            <div class="col-md-3">
-                                <button class="btn btn-warning w-100" @onclick='() => NavigateTo("/admin/promos")'>
-                                    <i class="bi bi-tag"></i> Promo Codes
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    @if (activeTab == "toppings")
+    {
+        <div class="section">
+            <div class="section-header">
+                <h2>Manage Toppings</h2>
+                <button class="btn btn-primary" @onclick="OpenAddToppingModal">+ Add Topping</button>
             </div>
-        </div>
-
-        <!-- Recent Orders -->
-        <div class="row">
-            <div class="col-12">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Recent Orders</h5>
-                        <button class="btn btn-sm btn-primary" @onclick="RefreshOrders">
-                            <i class="bi bi-arrow-clockwise"></i> Refresh
-                        </button>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Order #</th>
-                                        <th>Customer</th>
-                                        <th>Date</th>
-                                        <th>Items</th>
-                                        <th>Total</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @if (!recentOrders.Any())
-                                    {
-                                        <tr>
-                                            <td colspan="7" class="text-center text-muted py-4">
-                                                No orders yet
-                                            </td>
-                                        </tr>
-                                    }
-                                    else
-                                    {
-                                        @foreach (var order in recentOrders)
-                                        {
-                                            <tr>
-                                                <td>
-                                                    <strong>#@order.OrderId</strong>
-                                                </td>
-                                                <td>
-                                                    @if (order.User != null)
-                                                    {
-                                                        <div>@order.User.FirstName @order.User.LastName</div>
-                                                        <small class="text-muted">@order.User.Email</small>
-                                                    }
-                                                </td>
-                                                <td>
-                                                    <div>@order.OrderDate.ToLocalTime().ToString("MMM dd, yyyy")</div>
-                                                    <small class="text-muted">@order.OrderDate.ToLocalTime().ToString("hh:mm tt")</small>
-                                                </td>
-                                                <td>
-                                                    <span class="badge bg-secondary">
-                                                        @order.OrderItems.Sum(oi => oi.Quantity) items
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <strong>$@order.TotalAmount.ToString("F2")</strong>
-                                                </td>
-                                                <td>
-                                                    <span class="badge @GetStatusBadgeClass(order.Status)">
-                                                        @order.Status
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <div class="btn-group btn-group-sm">
-                                                        <button class="btn btn-outline-primary" 
-                                                                @onclick="() => ViewOrderDetails(order.OrderId)">
-                                                            <i class="bi bi-eye"></i>
-                                                        </button>
-                                                        @if (order.Status != OrderStatuses.Completed && order.Status != OrderStatuses.Cancelled)
-                                                        {
-                                                            <button class="btn btn-outline-success" 
-                                                                    @onclick="() => UpdateOrderStatus(order.OrderId)">
-                                                                <i class="bi bi-arrow-right"></i>
-                                                            </button>
-                                                        }
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        }
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var topping in toppings)
+                    {
+                        <tr>
+                            <td>@topping.Id</td>
+                            <td>@topping.Name</td>
+                            <td>$@topping.Price.ToString("F2")</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-secondary" @onclick="() => OpenEditToppingModal(topping)">Edit</button>
+                                    <button class="btn btn-danger" @onclick="() => DeleteTopping(topping.Id)">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     }
 </div>
 
+@if (showPizzaModal)
+{
+    <div class="modal-overlay" @onclick="ClosePizzaModal">
+        <div class="modal-content" @onclick:stopPropagation="true">
+            <div class="modal-header">
+                <h3>@(editingPizza.Id == 0 ? "Add New Pizza" : "Edit Pizza")</h3>
+                <button class="close-btn" @onclick="ClosePizzaModal">&times;</button>
+            </div>
+            
+            <div class="form-group">
+                <label>Pizza Name</label>
+                <input type="text" @bind="editingPizza.Name" placeholder="e.g., Margherita" />
+            </div>
+            
+            <div class="form-group">
+                <label>Description</label>
+                <textarea @bind="editingPizza.Description" placeholder="Describe the pizza..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Price ($)</label>
+                <input type="number" step="0.01" @bind="editingPizza.Price" />
+            </div>
+            
+            <button class="btn btn-success" @onclick="SavePizza">Save Pizza</button>
+        </div>
+    </div>
+}
+
+@if (showToppingModal)
+{
+    <div class="modal-overlay" @onclick="CloseToppingModal">
+        <div class="modal-content" @onclick:stopPropagation="true">
+            <div class="modal-header">
+                <h3>@(editingTopping.Id == 0 ? "Add New Topping" : "Edit Topping")</h3>
+                <button class="close-btn" @onclick="CloseToppingModal">&times;</button>
+            </div>
+            
+            <div class="form-group">
+                <label>Topping Name</label>
+                <input type="text" @bind="editingTopping.Name" placeholder="e.g., Extra Cheese" />
+            </div>
+            
+            <div class="form-group">
+                <label>Price ($)</label>
+                <input type="number" step="0.01" @bind="editingTopping.Price" />
+            </div>
+            
+            <button class="btn btn-success" @onclick="SaveTopping">Save Topping</button>
+        </div>
+    </div>
+}
+
 @code {
-    private bool loading = true;
-    private List<Order> recentOrders = new();
+    private string activeTab = "pizzas";
+    private bool showPizzaModal = false;
+    private bool showToppingModal = false;
     
-    private int totalOrders = 0;
-    private int pendingOrders = 0;
-    private int todayOrders = 0;
-    private decimal todayRevenue = 0;
-    private int totalPizzas = 0;
-
-    [Inject]
-    private NavigationManager Navigation { get; set; } = default!;
-
-    protected override async Task OnInitializedAsync()
+    private Pizza editingPizza = new();
+    private Topping editingTopping = new();
+    
+    private List<Pizza> pizzas = new()
     {
-        await LoadDashboardData();
+        new Pizza { Id = 1, Name = "Margherita", Description = "Classic pizza with tomato sauce, fresh mozzarella, and basil", Price = 12.99m },
+        new Pizza { Id = 2, Name = "Pepperoni", Description = "Traditional pepperoni with mozzarella cheese and tomato sauce", Price = 14.99m },
+        new Pizza { Id = 3, Name = "Vegetarian Supreme", Description = "Bell peppers, onions, mushrooms, olives, and tomatoes", Price = 13.99m },
+        new Pizza { Id = 4, Name = "BBQ Chicken", Description = "Grilled chicken, BBQ sauce, red onions, and cilantro", Price = 15.99m },
+        new Pizza { Id = 5, Name = "Hawaiian", Description = "Ham, pineapple, and mozzarella cheese", Price = 14.49m },
+        new Pizza { Id = 6, Name = "Four Cheese", Description = "Mozzarella, parmesan, gorgonzola, and ricotta", Price = 16.99m }
+    };
+    
+    private List<Order> orders = new()
+    {
+        new Order { Id = 1, UserId = 101, OrderDate = DateTime.Now.AddDays(-1), Total = 42.50m, Status = "Pending", DeliveryAddress = "123 Main St" },
+        new Order { Id = 2, UserId = 102, OrderDate = DateTime.Now.AddDays(-2), Total = 28.99m, Status = "Completed", DeliveryAddress = "456 Oak Ave" }
+    };
+    
+    private List<Topping> toppings = new()
+    {
+        new Topping { Id = 1, Name = "Extra Cheese", Price = 2.00m },
+        new Topping { Id = 2, Name = "Pepperoni", Price = 1.50m },
+        new Topping { Id = 3, Name = "Mushrooms", Price = 1.00m }
+    };
+    
+    private void SetActiveTab(string tab) => activeTab = tab;
+    
+    private void OpenAddPizzaModal()
+    {
+        editingPizza = new Pizza();
+        showPizzaModal = true;
     }
-
-    private async Task LoadDashboardData()
+    
+    private void OpenEditPizzaModal(Pizza pizza)
     {
-        loading = true;
-
-        try
-        {
-            // Load all orders
-            var allOrders = await OrderService.GetAllOrdersAsync();
-            recentOrders = allOrders.Take(10).ToList();
-            
-            // Calculate statistics
-            totalOrders = allOrders.Count;
-            pendingOrders = allOrders.Count(o => o.Status == OrderStatuses.Pending || 
-                                                 o.Status == OrderStatuses.Preparing);
-            
-            var today = DateTime.Today;
-            var todayOrdersList = allOrders.Where(o => o.OrderDate.Date == today).ToList();
-            todayOrders = todayOrdersList.Count;
-            todayRevenue = todayOrdersList.Sum(o => o.TotalAmount);
-
-            // Load pizzas count
-            var pizzas = await PizzaService.GetAllPizzasAsync();
-            totalPizzas = pizzas.Count;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error loading dashboard: {ex.Message}");
-        }
-        finally
-        {
-            loading = false;
-        }
-    }
-
-    private async Task RefreshOrders()
-    {
-        await LoadDashboardData();
-        StateHasChanged();
-    }
-
-    private string GetStatusBadgeClass(string status)
-    {
-        return status switch
-        {
-            OrderStatuses.Pending => "bg-warning text-dark",
-            OrderStatuses.Preparing => "bg-info",
-            OrderStatuses.Baking => "bg-primary",
-            OrderStatuses.QualityCheck => "bg-secondary",
-            OrderStatuses.OutForDelivery => "bg-primary",
-            OrderStatuses.Delivered => "bg-success",
-            OrderStatuses.Completed => "bg-success",
-            OrderStatuses.Cancelled => "bg-danger",
-            _ => "bg-secondary"
+        editingPizza = new Pizza 
+        { 
+            Id = pizza.Id, 
+            Name = pizza.Name, 
+            Description = pizza.Description, 
+            Price = pizza.Price 
         };
+        showPizzaModal = true;
     }
-
-    private void ViewOrderDetails(int orderId)
+    
+    private void ClosePizzaModal() => showPizzaModal = false;
+    
+    private void SavePizza()
     {
-        Navigation.NavigateTo($"/admin/orders/{orderId}");
-    }
-
-    private async Task UpdateOrderStatus(int orderId)
-    {
-        var order = recentOrders.FirstOrDefault(o => o.OrderId == orderId);
-        if (order == null) return;
-
-        var nextStatus = order.Status switch
+        if (editingPizza.Id == 0)
         {
-            OrderStatuses.Pending => OrderStatuses.Preparing,
-            OrderStatuses.Preparing => OrderStatuses.Baking,
-            OrderStatuses.Baking => OrderStatuses.QualityCheck,
-            OrderStatuses.QualityCheck => OrderStatuses.OutForDelivery,
-            OrderStatuses.OutForDelivery => OrderStatuses.Delivered,
-            OrderStatuses.Delivered => OrderStatuses.Completed,
-            _ => order.Status
-        };
-
-        await OrderService.UpdateOrderStatusAsync(orderId, nextStatus);
-        await RefreshOrders();
+            editingPizza.Id = pizzas.Max(p => p.Id) + 1;
+            pizzas.Add(editingPizza);
+        }
+        else
+        {
+            var existing = pizzas.FirstOrDefault(p => p.Id == editingPizza.Id);
+            if (existing != null)
+            {
+                existing.Name = editingPizza.Name;
+                existing.Description = editingPizza.Description;
+                existing.Price = editingPizza.Price;
+            }
+        }
+        ClosePizzaModal();
     }
-
-    private void NavigateTo(string path)
+    
+    private void DeletePizza(int id)
     {
-        Navigation.NavigateTo(path);
+        pizzas.RemoveAll(p => p.Id == id);
+    }
+    
+    private void OpenAddToppingModal()
+    {
+        editingTopping = new Topping();
+        showToppingModal = true;
+    }
+    
+    private void OpenEditToppingModal(Topping topping)
+    {
+        editingTopping = new Topping 
+        { 
+            Id = topping.Id, 
+            Name = topping.Name, 
+            Price = topping.Price 
+        };
+        showToppingModal = true;
+    }
+    
+    private void CloseToppingModal() => showToppingModal = false;
+    
+    private void SaveTopping()
+    {
+        if (editingTopping.Id == 0)
+        {
+            editingTopping.Id = toppings.Max(t => t.Id) + 1;
+            toppings.Add(editingTopping);
+        }
+        else
+        {
+            var existing = toppings.FirstOrDefault(t => t.Id == editingTopping.Id);
+            if (existing != null)
+            {
+                existing.Name = editingTopping.Name;
+                existing.Price = editingTopping.Price;
+            }
+        }
+        CloseToppingModal();
+    }
+    
+    private void DeleteTopping(int id)
+    {
+        toppings.RemoveAll(t => t.Id == id);
+    }
+    
+    private void UpdateOrderStatus(int orderId, string newStatus)
+    {
+        var order = orders.FirstOrDefault(o => o.Id == orderId);
+        if (order != null)
+        {
+            order.Status = newStatus;
+        }
+    }
+    
+    public class Pizza
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
+        public string Description { get; set; } = "";
+        public decimal Price { get; set; }
+    }
+    
+    public class Order
+    {
+        public int Id { get; set; }
+        public int UserId { get; set; }
+        public DateTime OrderDate { get; set; }
+        public decimal Total { get; set; }
+        public string Status { get; set; } = "Pending";
+        public string DeliveryAddress { get; set; } = "";
+    }
+    
+    public class Topping
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
+        public decimal Price { get; set; }
     }
 }
