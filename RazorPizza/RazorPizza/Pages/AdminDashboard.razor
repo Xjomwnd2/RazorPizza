@@ -236,6 +236,21 @@
         font-weight: 500;
     }
 
+    .status-preparing {
+        background: #e3f2fd;
+        color: #1565c0;
+    }
+
+    .status-baking {
+        background: #fff8e1;
+        color: #f57f17;
+    }
+
+    .status-delivering {
+        background: #f3e5f5;
+        color: #6a1b9a;
+    }
+
     .status-pending {
         background: #fff3e0;
         color: #e65100;
@@ -321,6 +336,7 @@
                         <th>Total</th>
                         <th>Status</th>
                         <th>Delivery Address</th>
+                        <th>Payment</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -328,17 +344,21 @@
                     @foreach (var order in orders)
                     {
                         <tr>
-                            <td>#@order.Id</td>
+                            <td>#@order.OrderId</td>
                             <td>@order.UserId</td>
-                            <td>@order.OrderDate.ToString("MMM dd, yyyy")</td>
-                            <td>$@order.Total.ToString("F2")</td>
+                            <td>@order.OrderDate.ToString("MMM dd, yyyy HH:mm")</td>
+                            <td>$@order.TotalAmount.ToString("F2")</td>
                             <td>
                                 <span class="status-badge status-@order.Status.ToLower()">@order.Status</span>
                             </td>
                             <td>@order.DeliveryAddress</td>
+                            <td>@order.PaymentMethod</td>
                             <td>
-                                <select @onchange="(e) => UpdateOrderStatus(order.Id, e.Value.ToString())">
+                                <select @onchange="(e) => UpdateOrderStatus(order.OrderId, e.Value?.ToString() ?? order.Status)">
                                     <option value="Pending" selected="@(order.Status == "Pending")">Pending</option>
+                                    <option value="Preparing" selected="@(order.Status == "Preparing")">Preparing</option>
+                                    <option value="Baking" selected="@(order.Status == "Baking")">Baking</option>
+                                    <option value="Delivering" selected="@(order.Status == "Delivering")">Delivering</option>
                                     <option value="Completed" selected="@(order.Status == "Completed")">Completed</option>
                                     <option value="Cancelled" selected="@(order.Status == "Cancelled")">Cancelled</option>
                                 </select>
@@ -461,8 +481,9 @@
     
     private List<Order> orders = new()
     {
-        new Order { Id = 1, UserId = 101, OrderDate = DateTime.Now.AddDays(-1), Total = 42.50m, Status = "Pending", DeliveryAddress = "123 Main St" },
-        new Order { Id = 2, UserId = 102, OrderDate = DateTime.Now.AddDays(-2), Total = 28.99m, Status = "Completed", DeliveryAddress = "456 Oak Ave" }
+        new Order { OrderId = 1, UserId = "user101", OrderDate = DateTime.Now.AddHours(-2), SubTotal = 38.97m, Tax = 3.12m, DeliveryFee = 5.99m, TotalAmount = 48.08m, Status = "Preparing", DeliveryAddress = "123 Main St, Apt 4B", PaymentMethod = "Credit Card" },
+        new Order { OrderId = 2, UserId = "user102", OrderDate = DateTime.Now.AddDays(-1), SubTotal = 28.99m, Tax = 2.32m, DeliveryFee = 5.99m, TotalAmount = 37.30m, Status = "Completed", DeliveryAddress = "456 Oak Ave", PaymentMethod = "PayPal" },
+        new Order { OrderId = 3, UserId = "user103", OrderDate = DateTime.Now.AddHours(-5), SubTotal = 45.50m, Tax = 3.64m, DeliveryFee = 5.99m, TotalAmount = 55.13m, Status = "Baking", DeliveryAddress = "789 Pine Rd", PaymentMethod = "Cash" }
     };
     
     private List<Topping> toppings = new()
@@ -564,7 +585,7 @@
     
     private void UpdateOrderStatus(int orderId, string newStatus)
     {
-        var order = orders.FirstOrDefault(o => o.Id == orderId);
+        var order = orders.FirstOrDefault(o => o.OrderId == orderId);
         if (order != null)
         {
             order.Status = newStatus;
@@ -579,15 +600,8 @@
         public decimal Price { get; set; }
     }
     
-    public class Order
-    {
-        public int Id { get; set; }
-        public int UserId { get; set; }
-        public DateTime OrderDate { get; set; }
-        public decimal Total { get; set; }
-        public string Status { get; set; } = "Pending";
-        public string DeliveryAddress { get; set; } = "";
-    }
+    // Only keep Pizza, Topping classes here if they don't exist in your Models folder
+    // If you have Pizza.cs and Topping.cs in Models folder, remove these class definitions
     
     public class Topping
     {
