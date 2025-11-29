@@ -1,5 +1,7 @@
 @page "/shoppingcart"
+@using RazorPizza.Models
 @using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager NavigationManager
 
 <PageTitle>Shopping Cart</PageTitle>
 
@@ -384,7 +386,7 @@
                 @if (discount > 0)
                 {
                     <div class="summary-row" style="color: var(--success-color);">
-                        <span>Discount</span>
+                        <span>Discount (@promoCode)</span>
                         <span>-$@discount.ToString("F2")</span>
                     </div>
                 }
@@ -415,6 +417,8 @@
 </div>
 
 @code {
+    // CartItem is UI-only, not stored in database directly
+    // It represents items in the user's session before checkout
     private List<CartItem> cartItems = new()
     {
         new CartItem 
@@ -450,8 +454,9 @@
     private decimal discount = 0;
     private decimal deliveryFee = 5.99m;
     
+    // Calculate values to match your Order model structure
     private decimal subtotal => cartItems.Sum(item => item.Price * item.Quantity);
-    private decimal tax => subtotal * 0.08m;
+    private decimal tax => subtotal * 0.08m; // 8% tax
     private decimal total => subtotal + tax + deliveryFee - discount;
     
     private void IncreaseQuantity(int itemId)
@@ -479,6 +484,7 @@
     
     private void ApplyPromoCode()
     {
+        // Match your Order model's PromoCode and Discount fields
         if (promoCode.ToUpper() == "PIZZA10")
         {
             discount = subtotal * 0.10m;
@@ -487,24 +493,39 @@
         {
             discount = subtotal * 0.20m;
         }
+        else if (promoCode.ToUpper() == "FREEDELIVER")
+        {
+            discount = deliveryFee;
+        }
         else
         {
             discount = 0;
+            // You could show an error message here
         }
     }
     
     private void ProceedToCheckout()
     {
-        // Navigate to checkout page
-        // NavigationManager.NavigateTo("/checkout");
+        // When ready to connect to your Order system:
+        // 1. Create a new Order object with these calculated values
+        // 2. Set Order.SubTotal = subtotal
+        // 3. Set Order.Tax = tax
+        // 4. Set Order.DeliveryFee = deliveryFee
+        // 5. Set Order.Discount = discount
+        // 6. Set Order.PromoCode = promoCode
+        // 7. Set Order.TotalAmount = total
+        // 8. Save to database via OrderService
+        
+        NavigationManager.NavigateTo("/checkout");
     }
     
     private void GoToMenu()
     {
-        // Navigate to menu page
-        // NavigationManager.NavigateTo("/menu");
+        NavigationManager.NavigateTo("/menu");
     }
     
+    // CartItem is for UI only - represents shopping cart before order is placed
+    // Once user clicks "Proceed to Checkout", these become OrderItem objects
     public class CartItem
     {
         public int Id { get; set; }
