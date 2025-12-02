@@ -5,6 +5,7 @@ using RazorPizza.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
 // Add services to the container
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
@@ -55,15 +56,9 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
     app.UseHsts();
-    // Only redirect to HTTPS in production
-    app.UseHttpsRedirection();
-}
-else
-{
-    // In development, show detailed errors
-    app.UseDeveloperExceptionPage();
 }
 
+app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
