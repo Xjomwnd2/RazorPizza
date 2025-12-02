@@ -3,7 +3,30 @@
 
 <PageTitle>Checkout - Razor Pizza</PageTitle>
 
-<div class="container my-5">
+<style>
+    .checkout-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .validation-error {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 5px;
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+        padding: 12px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="checkout-container">
     <div class="row">
         <div class="col-12 text-center mb-4">
             <h1 class="display-4 fw-bold text-primary">🛒 Checkout</h1>
@@ -12,64 +35,103 @@
     </div>
 
     <div class="row">
-        <div class="col-md-8 mx-auto">
+        <div class="col-12">
             <div class="card shadow-sm">
-                <div class="card-body p-5">
+                <div class="card-body p-4 p-md-5">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert-danger">
+                            ⚠️ @errorMessage
+                        </div>
+                    }
+
                     <h3 class="mb-4">Delivery Information</h3>
                     
                     <form>
                         <div class="mb-3">
-                            <label class="form-label">Full Name</label>
-                            <input type="text" class="form-control" @bind="fullName" placeholder="John Doe" />
+                            <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control @(showValidation && string.IsNullOrWhiteSpace(fullName) ? "is-invalid" : "")" 
+                                   @bind="fullName" placeholder="John Doe" />
+                            @if (showValidation && string.IsNullOrWhiteSpace(fullName))
+                            {
+                                <div class="validation-error">Full name is required</div>
+                            }
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label">Phone Number</label>
-                            <input type="tel" class="form-control" @bind="phoneNumber" placeholder="+254 712 345 678" />
+                            <label class="form-label">Phone Number <span class="text-danger">*</span></label>
+                            <input type="tel" class="form-control @(showValidation && string.IsNullOrWhiteSpace(phoneNumber) ? "is-invalid" : "")" 
+                                   @bind="phoneNumber" placeholder="+254 712 345 678" />
+                            @if (showValidation && string.IsNullOrWhiteSpace(phoneNumber))
+                            {
+                                <div class="validation-error">Phone number is required</div>
+                            }
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <input type="email" class="form-control" @bind="email" placeholder="john@example.com" />
+                            <label class="form-label">Email <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control @(showValidation && string.IsNullOrWhiteSpace(email) ? "is-invalid" : "")" 
+                                   @bind="email" placeholder="john@example.com" />
+                            @if (showValidation && string.IsNullOrWhiteSpace(email))
+                            {
+                                <div class="validation-error">Email is required</div>
+                            }
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label">Delivery Address</label>
-                            <textarea class="form-control" @bind="address" rows="3" placeholder="Street, Building, Apartment"></textarea>
+                            <label class="form-label">Delivery Address <span class="text-danger">*</span></label>
+                            <textarea class="form-control @(showValidation && string.IsNullOrWhiteSpace(address) ? "is-invalid" : "")" 
+                                      @bind="address" rows="3" placeholder="Street, Building, Apartment"></textarea>
+                            @if (showValidation && string.IsNullOrWhiteSpace(address))
+                            {
+                                <div class="validation-error">Delivery address is required</div>
+                            }
                         </div>
                         
                         <div class="mb-4">
                             <label class="form-label">Special Instructions (Optional)</label>
-                            <textarea class="form-control" @bind="specialInstructions" rows="2" placeholder="e.g., Ring doorbell twice"></textarea>
+                            <textarea class="form-control" @bind="specialInstructions" rows="2" 
+                                      placeholder="e.g., Ring doorbell twice, Leave at door"></textarea>
                         </div>
                         
-                        <h4 class="mb-3">Payment Method</h4>
-                        <div class="mb-3">
+                        <h4 class="mb-3">Payment Method <span class="text-danger">*</span></h4>
+                        <div class="mb-4">
                             <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="payment" id="mpesa" @onchange='() => paymentMethod = "M-Pesa"' checked>
+                                <input class="form-check-input" type="radio" name="payment" id="mpesa" 
+                                       checked @onchange='() => paymentMethod = "M-Pesa"'>
                                 <label class="form-check-label" for="mpesa">
-                                    M-Pesa
+                                    📱 M-Pesa
                                 </label>
                             </div>
                             <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="payment" id="card" @onchange='() => paymentMethod = "Card"'>
+                                <input class="form-check-input" type="radio" name="payment" id="card" 
+                                       @onchange='() => paymentMethod = "Card"'>
                                 <label class="form-check-label" for="card">
-                                    Credit/Debit Card
+                                    💳 Credit/Debit Card
                                 </label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="payment" id="cash" @onchange='() => paymentMethod = "Cash"'>
+                                <input class="form-check-input" type="radio" name="payment" id="cash" 
+                                       @onchange='() => paymentMethod = "Cash"'>
                                 <label class="form-check-label" for="cash">
-                                    Cash on Delivery
+                                    💵 Cash on Delivery
                                 </label>
                             </div>
                         </div>
                         
                         <div class="d-grid gap-2 mt-4">
-                            <button type="button" class="btn btn-success btn-lg" @onclick="PlaceOrder">
-                                Place Order
+                            <button type="button" class="btn btn-success btn-lg" @onclick="PlaceOrder" disabled="@isProcessing">
+                                @if (isProcessing)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                    <text>Processing...</text>
+                                }
+                                else
+                                {
+                                    <text>Place Order</text>
+                                }
                             </button>
-                            <button type="button" class="btn btn-outline-secondary" @onclick='() => Navigation.NavigateTo("/shoppingcart")'>
+                            <button type="button" class="btn btn-outline-secondary" @onclick='() => Navigation.NavigateTo("/shoppingcart")' disabled="@isProcessing">
                                 Back to Cart
                             </button>
                         </div>
@@ -87,16 +149,70 @@
     private string address = "";
     private string specialInstructions = "";
     private string paymentMethod = "M-Pesa";
+    private bool showValidation = false;
+    private bool isProcessing = false;
+    private string errorMessage = "";
 
     private void PlaceOrder()
     {
-        // TODO: Implement order placement logic
-        // 1. Validate form fields
-        // 2. Create order in database
-        // 3. Process payment
-        // 4. Send confirmation
+        showValidation = true;
+        errorMessage = "";
+
+        // Validate required fields
+        if (string.IsNullOrWhiteSpace(fullName))
+        {
+            errorMessage = "Please fill in all required fields";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(phoneNumber))
+        {
+            errorMessage = "Please fill in all required fields";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            errorMessage = "Please fill in all required fields";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(address))
+        {
+            errorMessage = "Please fill in all required fields";
+            return;
+        }
+
+        // Basic email validation
+        if (!email.Contains("@") || !email.Contains("."))
+        {
+            errorMessage = "Please enter a valid email address";
+            return;
+        }
+
+        // Process order
+        isProcessing = true;
         
-        // For now, navigate to a confirmation page
-        Navigation.NavigateTo("/order-confirmation");
+        // TODO: Implement full order placement logic
+        // 1. Create order object with all details including paymentMethod
+        // 2. Save to database via OrderService
+        // 3. Process payment based on paymentMethod
+        // 4. Send confirmation email
+        
+        Console.WriteLine($"Order Details:");
+        Console.WriteLine($"Name: {fullName}");
+        Console.WriteLine($"Phone: {phoneNumber}");
+        Console.WriteLine($"Email: {email}");
+        Console.WriteLine($"Address: {address}");
+        Console.WriteLine($"Payment Method: {paymentMethod}");
+        Console.WriteLine($"Special Instructions: {specialInstructions}");
+        
+        // Simulate processing delay
+        Task.Delay(1500).ContinueWith(_ => 
+        {
+            isProcessing = false;
+            // Navigate to confirmation page
+            Navigation.NavigateTo("/order-confirmation");
+        });
     }
 }
