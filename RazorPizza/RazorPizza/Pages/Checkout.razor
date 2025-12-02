@@ -1,0 +1,102 @@
+@page "/checkout"
+@inject NavigationManager Navigation
+
+<PageTitle>Checkout - Razor Pizza</PageTitle>
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12 text-center mb-4">
+            <h1 class="display-4 fw-bold text-primary">🛒 Checkout</h1>
+            <p class="lead text-muted">Complete your order</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-body p-5">
+                    <h3 class="mb-4">Delivery Information</h3>
+                    
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-control" @bind="fullName" placeholder="John Doe" />
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" @bind="phoneNumber" placeholder="+254 712 345 678" />
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" @bind="email" placeholder="john@example.com" />
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Delivery Address</label>
+                            <textarea class="form-control" @bind="address" rows="3" placeholder="Street, Building, Apartment"></textarea>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Special Instructions (Optional)</label>
+                            <textarea class="form-control" @bind="specialInstructions" rows="2" placeholder="e.g., Ring doorbell twice"></textarea>
+                        </div>
+                        
+                        <h4 class="mb-3">Payment Method</h4>
+                        <div class="mb-3">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="payment" id="mpesa" @onchange='() => paymentMethod = "M-Pesa"' checked>
+                                <label class="form-check-label" for="mpesa">
+                                    M-Pesa
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="payment" id="card" @onchange='() => paymentMethod = "Card"'>
+                                <label class="form-check-label" for="card">
+                                    Credit/Debit Card
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="payment" id="cash" @onchange='() => paymentMethod = "Cash"'>
+                                <label class="form-check-label" for="cash">
+                                    Cash on Delivery
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="button" class="btn btn-success btn-lg" @onclick="PlaceOrder">
+                                Place Order
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" @onclick='() => Navigation.NavigateTo("/shoppingcart")'>
+                                Back to Cart
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string fullName = "";
+    private string phoneNumber = "";
+    private string email = "";
+    private string address = "";
+    private string specialInstructions = "";
+    private string paymentMethod = "M-Pesa";
+
+    private void PlaceOrder()
+    {
+        // TODO: Implement order placement logic
+        // 1. Validate form fields
+        // 2. Create order in database
+        // 3. Process payment
+        // 4. Send confirmation
+        
+        // For now, navigate to a confirmation page
+        Navigation.NavigateTo("/order-confirmation");
+    }
+}
