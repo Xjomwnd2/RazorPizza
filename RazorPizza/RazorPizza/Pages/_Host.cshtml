@@ -17,21 +17,73 @@
     <!-- Your custom CSS -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link href="RazorPizza.styles.css" rel="stylesheet" asp-append-version="true" />
+    
+    <style>
+        #blazor-error-ui {
+            background: #dc3545;
+            bottom: 0;
+            box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.3);
+            display: none; /* Hidden by default */
+            left: 0;
+            padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+            position: fixed;
+            width: 100%;
+            z-index: 1000;
+            color: white;
+        }
+
+        #blazor-error-ui .dismiss {
+            cursor: pointer;
+            position: absolute;
+            right: 0.75rem;
+            top: 0.5rem;
+            font-size: 1.5rem;
+            color: white;
+            text-decoration: none;
+        }
+
+        #blazor-error-ui .dismiss:hover {
+            opacity: 0.8;
+        }
+
+        #blazor-error-ui .reload {
+            background: white;
+            color: #dc3545;
+            padding: 0.4rem 1rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 1rem;
+            display: inline-block;
+        }
+
+        #blazor-error-ui .reload:hover {
+            opacity: 0.9;
+        }
+    </style>
 </head>
 <body>
     <component type="typeof(App)" render-mode="ServerPrerendered" />
 
     <div id="blazor-error-ui">
-        <environment include="Staging,Production">
-            An error has occurred. This application may no longer respond until reloaded.
-        </environment>
-        <environment include="Development">
-            An unhandled exception has occurred. See browser dev tools for details.
-        </environment>
+        ⚠️ An error has occurred. 
         <a href="" class="reload">Reload</a>
         <a class="dismiss">🗙</a>
     </div>
 
     <script src="_framework/blazor.server.js"></script>
+    
+    <script>
+        // Custom error handler - only show error UI when there's an actual error
+        window.addEventListener('beforeunload', function() {
+            // Hide error UI on page unload
+            document.getElementById('blazor-error-ui').style.display = 'none';
+        });
+
+        // Enhanced dismiss button
+        document.querySelector('#blazor-error-ui .dismiss').addEventListener('click', function () {
+            document.getElementById('blazor-error-ui').style.display = 'none';
+        });
+    </script>
 </body>
 </html>
