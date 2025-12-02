@@ -42,8 +42,16 @@
                     </p>
                 }
 
+                @if (showAddedMessage)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle"></i> Pizza added to cart!
+                        <button type="button" class="btn-close" @onclick="() => showAddedMessage = false"></button>
+                    </div>
+                }
+
                 <div class="mt-4">
-                    <button class="btn btn-success btn-lg me-2">
+                    <button class="btn btn-success btn-lg me-2" @onclick="AddToCart">
                         <i class="bi bi-cart-plus"></i> Add to Cart
                     </button>
                     <button class="btn btn-outline-secondary" @onclick='() => Navigation.NavigateTo("/menu")'>
@@ -61,6 +69,7 @@
 
     private Pizza? pizza;
     private bool loading = true;
+    private bool showAddedMessage = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -73,5 +82,25 @@
         var allPizzas = await PizzaService.GetAllPizzasAsync();
         pizza = allPizzas.FirstOrDefault(p => p.PizzaId == PizzaId);
         loading = false;
+    }
+
+    private void AddToCart()
+    {
+        if (pizza != null)
+        {
+            // TODO: Implement actual cart service
+            // For now, just show a success message
+            showAddedMessage = true;
+            
+            // Auto-hide message after 3 seconds
+            Task.Delay(3000).ContinueWith(_ => 
+            {
+                showAddedMessage = false;
+                InvokeAsync(StateHasChanged);
+            });
+            
+            // Alternative: Navigate to cart page if you have one
+            // Navigation.NavigateTo("/cart");
+        }
     }
 }
