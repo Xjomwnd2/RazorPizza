@@ -1,0 +1,94 @@
+@page "/order-confirmation"
+@inject NavigationManager Navigation
+
+<PageTitle>Order Confirmed - Razor Pizza</PageTitle>
+
+<style>
+    .confirmation-container {
+        max-width: 600px;
+        margin: 80px auto;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .success-icon {
+        font-size: 5rem;
+        margin-bottom: 20px;
+        animation: scaleIn 0.5s ease;
+    }
+
+    @@keyframes scaleIn {
+        from {
+            transform: scale(0);
+            opacity: 0;
+        }
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    .confirmation-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        padding: 40px;
+    }
+
+    .order-number {
+        background: #f0f0f0;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 20px 0;
+        font-size: 1.2rem;
+    }
+
+    .info-box {
+        background: #e8f5e9;
+        border-left: 4px solid #4caf50;
+        padding: 15px;
+        margin: 20px 0;
+        text-align: left;
+    }
+</style>
+
+<div class="confirmation-container">
+    <div class="confirmation-card">
+        <div class="success-icon">✅</div>
+        <h1 class="display-4 fw-bold text-success mb-3">Order Confirmed!</h1>
+        <p class="lead text-muted mb-4">Thank you for your order. Your delicious pizzas are on the way!</p>
+        
+        <div class="order-number">
+            <strong>Order Number:</strong> #@orderNumber
+        </div>
+
+        <div class="info-box">
+            <h5>📦 What's Next?</h5>
+            <ul style="text-align: left; margin: 10px 0 0 20px;">
+                <li>You'll receive a confirmation email shortly</li>
+                <li>Your order will be prepared in 15-20 minutes</li>
+                <li>Estimated delivery: 30-45 minutes</li>
+                <li>Track your order status in your account</li>
+            </ul>
+        </div>
+
+        <div class="d-grid gap-2 mt-4">
+            <button class="btn btn-primary btn-lg" @onclick='() => Navigation.NavigateTo("/menu")'>
+                Order More Pizza
+            </button>
+            <button class="btn btn-outline-secondary" @onclick='() => Navigation.NavigateTo("/")'>
+                Back to Home
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string orderNumber = "";
+
+    protected override void OnInitialized()
+    {
+        // Generate random order number
+        orderNumber = $"PZ{DateTime.Now:yyyyMMddHHmmss}";
+    }
+}
